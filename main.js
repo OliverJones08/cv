@@ -44,7 +44,8 @@
   };
   const stop = () => fade(0, 500, () => { audio.pause(); setPlaying(false); });
 
-  audio.addEventListener('error', () => { player.dataset.missing = ''; player.title = 'Add assets/marea.mp3 to hear the music'; });
+  // with <source> children, only the last source reports when every option failed
+  $$('source', audio).at(-1).addEventListener('error', () => { player.dataset.missing = ''; player.title = 'Music unavailable'; });
   player.addEventListener('click', () => {
     if (audio.paused) { store.set('muted', '0'); play(); } else { store.set('muted', '1'); stop(); }
   });

@@ -39,7 +39,11 @@
     <span class="player__eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
     <span class="label player__title">Marea (We've Lost Dancing) — Fred again..</span>
   </button>
-  <audio src="assets/marea.mp3" loop preload="auto"></audio>
+  <audio loop preload="auto">
+    <!-- full track if you add it locally; otherwise Apple Music's official 30-second preview -->
+    <source src="assets/marea.mp3" type="audio/mpeg">
+    <source src="https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/15/ea/4e/15ea4ed2-f7fc-f87c-b44f-9ca2c628437a/mzaf_1763923556124349361.plus.aac.p.m4a" type="audio/mp4">
+  </audio>
 
   <main>
 
@@ -251,6 +255,7 @@
         <li data-reveal><p class="label">GitHub</p><a href="#contact">[ your GitHub ]</a></li>
       </ul>
       <footer class="footer">
+        <p class="label">Music: Marea (We've Lost Dancing) — Fred again.. &amp; The Blessed Madonna · <a href="https://music.apple.com/us/album/marea-weve-lost-dancing/1553064273" target="_blank" rel="noopener">Listen on Apple Music ↗</a></p>
         <p class="label">© 2026 Oliver Jones · Buenos Aires</p>
       </footer>
     </section>

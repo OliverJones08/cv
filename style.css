@@ -284,7 +284,9 @@ figcaption.label { margin-top: 12px; }
 .contact__links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding-bottom: 72px; border-bottom: 1px solid var(--line); }
 .contact__links a { display: inline-block; font-size: 24px; letter-spacing: -.01em; margin-top: 8px; transition: color .3s; }
 .contact__links a:hover { color: var(--mute); }
-.footer { display: flex; justify-content: flex-end; padding: 32px 0 8px; }
+.footer { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 32px 0 96px; } /* bottom room for the music button */
+.footer a { color: var(--fg); transition: color .3s; }
+.footer a:hover { color: var(--mute); }
 
 /* ---------- small screens ---------- */
 @media (max-width: 900px) {
