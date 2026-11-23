@@ -89,7 +89,15 @@ ul, ol { list-style: none; }
   filter: blur(1.5px);
 }
 .loader__name { position: relative; font-size: 28px; font-weight: 500; letter-spacing: -.015em; transform: translateY(-36px); }
-.loader__count { position: absolute; top: calc(50% + 28px); }
+.loader__count, .loader__enter { position: absolute; top: calc(50% + 28px); }
+.loader__enter { color: var(--fg); opacity: 0; visibility: hidden; }
+.loader.is-ready { cursor: pointer; }
+.loader.is-ready .loader__enter { visibility: visible; animation: breathe 2.4s ease-in-out infinite; }
+.loader.is-ready .loader__ring { transition: transform 1.2s var(--ease), box-shadow 1.2s var(--ease); }
+.loader.is-ready:hover .loader__ring { transform: scale(1.03); box-shadow: 0 0 110px rgba(255, 255, 255, .35), inset 0 0 140px rgba(255, 255, 255, .12); }
+.loader:focus-visible { outline: none; }
+.loader:focus-visible .loader__enter { text-decoration: underline; text-underline-offset: 6px; }
+@keyframes breathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 html:not(.js) .loader { display: none; }
 
 /* ---------- nav + player ---------- */
@@ -202,31 +210,22 @@ html:not(.js) .loader { display: none; }
 .sport__text .h2 { margin: 0 0 8px -4px; }
 .plain { font-size: 20px; line-height: 1.55; }
 .rule { border-top: 1px solid var(--line); padding-top: 24px; margin-top: 12px; }
+/* the original Instagram post (dark mode, so it melts into the black page) */
 .sport__photo {
   position: absolute; top: 104px; bottom: 36px; right: var(--pad); /* clears the fixed nav */
-  width: 52.8vw; overflow: hidden; border-radius: 4px;
+  width: 52.8vw;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
 }
-.sport__photo img { filter: grayscale(1) contrast(1.15); }
-/* England Rugby posted this photo: credit it like the Instagram post it came from */
-.credit {
-  position: absolute; top: 20px; left: 20px;
-  display: grid; grid-template-columns: auto auto; column-gap: 10px; align-items: center;
-  padding: 10px 16px 10px 12px; border-radius: 12px;
-  background: rgba(0, 0, 0, .55); border: 1px solid rgba(255, 255, 255, .14);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  transition: background .3s;
+.post {
+  display: block; min-height: 0; flex: 0 1 auto;
+  height: calc(100% - 40px); aspect-ratio: 1206 / 1925; max-width: 100%;
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  transition: transform 1s var(--ease), border-color .3s;
 }
-.credit:hover { background: rgba(0, 0, 0, .75); }
-.credit__ig { grid-row: span 2; }
-.credit__who { display: flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
-.credit__where { font-size: 10px; color: rgba(237, 237, 237, .7); }
-.sport__photo::after { content: ""; position: absolute; inset: auto 0 0; height: 30%; background: linear-gradient(transparent, rgba(0, 0, 0, .7)); pointer-events: none; }
-.credit__caption {
-  z-index: 1;
-  position: absolute; left: 20px; right: 20px; bottom: 20px;
-  font-size: 15px; line-height: 1.4; color: var(--fg);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, .8);
-}
+.post:hover { transform: scale(1.015); border-color: #3a3a3a; }
+.post img { object-fit: contain; }
+.post__caption { font-size: 14px; line-height: 1.4; color: var(--fg); max-width: min(100%, 460px); }
+.post__caption b { font-weight: 600; margin-right: 4px; }
 
 /* ---------- 06 school ---------- */
 .school { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
@@ -294,7 +293,8 @@ figcaption.label { margin-top: 12px; }
   .word { scroll-snap-align: start; }
   .projects { grid-template-columns: 1fr; gap: 56px; }
   .sport { height: auto; display: grid; gap: 40px; }
-  .sport__photo { position: relative; inset: auto; width: 100%; aspect-ratio: 4 / 5; }
+  .sport__photo { position: relative; inset: auto; width: 100%; }
+  .post { height: auto; width: 100%; max-width: 460px; }
   .school__right { padding-top: 0; }
   .courses li { grid-template-columns: 1fr; gap: 6px; }
   .world__strip { flex-direction: column; }

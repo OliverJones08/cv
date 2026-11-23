@@ -20,9 +20,9 @@
   }));
 
   /* ---------- music ----------
-     Tries to play the moment the page opens. Most browsers block sound until the
-     visitor interacts, so if blocked it starts on the first click / tap / key.
-     No popup. The button mutes and is remembered. */
+     Every browser blocks sound until the visitor clicks, taps or presses a key,
+     so the gesture that enters the page (see loader) is the one that starts Marea.
+     The button mutes and is remembered. */
   const audio = $('audio');
   const player = $('.player');
   const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -50,15 +50,6 @@
   player.addEventListener('click', () => {
     if (audio.paused) { store.set('muted', '0'); play(); } else { store.set('muted', '1'); stop(); }
   });
-  // scrolling alone never counts as a gesture for browsers; these do
-  const gestures = ['pointerdown', 'pointerup', 'touchend', 'keydown'];
-  const stopListening = () => gestures.forEach((t) => window.removeEventListener(t, onGesture, true));
-  function onGesture(e) {
-    if (player.contains(e.target) || store.get('muted') === '1' || !audio.paused) return stopListening(); // the button handles itself
-    play().then((ok) => ok && stopListening());
-  }
-  gestures.forEach((t) => window.addEventListener(t, onGesture, true));
-  if (store.get('muted') !== '1') play().then((ok) => ok && stopListening()); // works when the browser allows autoplay
 
   /* ---------- loader ---------- */
   const loader = $('.loader');
@@ -74,15 +65,38 @@
   const minTime = new Promise((r) => setTimeout(r, reduce ? 0 : 1800));
 
   lenis && lenis.stop();
+  const enterLabel = $('.loader__enter');
+  if (matchMedia('(pointer: coarse)').matches) enterLabel.textContent = 'Tap to enter';
+
+  // at 100% the ring waits; the click / tap / key that enters is the one that starts Marea
   Promise.all([ready, minTime, document.fonts.ready]).then(() => {
-    gsap.timeline({ onComplete: () => { loader.remove(); lenis && lenis.start(); ScrollTrigger.refresh(); } })
+    gsap.timeline()
       .to(progress, { v: 100, duration: 0.4, onUpdate: showCount })
-      .to('.loader__ring', { scale: 1.6, opacity: 0, duration: 1.2, ease: 'expo.inOut' }, '>-0.1')
+      .to('.loader__count', { opacity: 0, y: -8, duration: 0.4, ease: 'power2.in' }, '+=0.2')
+      .add(() => {
+        loader.classList.add('is-ready');
+        loader.tabIndex = 0;
+        loader.focus({ preventScroll: true });
+        loader.addEventListener('click', enter);
+        window.addEventListener('keydown', enter);
+      });
+  });
+
+  let entered = false;
+  function enter(e) {
+    if (entered || (e.type === 'keydown' && ['Escape', 'Tab', 'Shift', 'Meta', 'Alt', 'Control'].includes(e.key))) return;
+    entered = true;
+    loader.removeEventListener('click', enter);
+    window.removeEventListener('keydown', enter);
+    if (store.get('muted') !== '1') play(); // called inside the gesture, so every browser allows it
+    loader.classList.remove('is-ready');
+    gsap.timeline({ onComplete: () => { loader.remove(); lenis && lenis.start(); ScrollTrigger.refresh(); } })
+      .to('.loader__ring', { scale: 1.6, opacity: 0, duration: 1.2, ease: 'expo.inOut' })
       .to('.loader__beam', { scaleX: 0, opacity: 0, duration: 0.8, ease: 'expo.inOut' }, '<')
-      .to(['.loader__name', '.loader__count'], { y: -24, opacity: 0, duration: 0.6, ease: 'power2.in' }, '<')
+      .to(['.loader__name', '.loader__enter'], { y: -24, opacity: 0, duration: 0.6, ease: 'power2.in' }, '<')
       .to(loader, { opacity: 0, duration: 0.6 }, '-=0.4')
       .add(heroIn, '-=0.5');
-  });
+  }
 
   function heroIn() {
     if (reduce) return;
