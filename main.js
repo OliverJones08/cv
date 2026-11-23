@@ -173,9 +173,10 @@
     /* Sport: photo starts centered and big, slides to the right (Lustre) */
     const photo = $('.sport__photo');
     const toCenter = () => window.innerWidth / 2 - (photo.offsetLeft + photo.offsetWidth / 2);
+    // fromTo, not from: after a refresh a from() re-reads its start as its end and never moves
     gsap.timeline({ scrollTrigger: { trigger: '.sport', start: 'top top', end: '+=120%', pin: true, scrub: 1, invalidateOnRefresh: true } })
-      .from(photo, { x: toCenter, scale: 1.12, duration: 1, ease: 'power2.inOut' })
-      .from('.sport__text > *', { opacity: 0, y: 40, stagger: 0.06, duration: 0.5, ease: 'power2.out' }, 0.45);
+      .fromTo(photo, { x: toCenter }, { x: 0, duration: 1, ease: 'power2.inOut' })
+      .fromTo('.sport__text > *', { opacity: 0, y: 40 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.5, ease: 'power2.out' }, 0.45);
   });
 
   addEventListener('load', () => ScrollTrigger.refresh());

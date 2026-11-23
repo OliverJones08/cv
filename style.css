@@ -218,7 +218,7 @@ html:not(.js) .loader { display: none; }
 }
 .post {
   display: block; min-height: 0; flex: 0 1 auto;
-  height: calc(100% - 40px); aspect-ratio: 1206 / 1925; max-width: 100%;
+  height: calc(100% - 56px); aspect-ratio: 1206 / 1925; max-width: 100%;
   border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
   transition: transform 1s var(--ease), border-color .3s;
 }
