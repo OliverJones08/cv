@@ -137,6 +137,9 @@ html:not(.js) .loader { display: none; }
   position: absolute; left: 50%; bottom: 0; translate: -50% 0;
   height: 87%; aspect-ratio: 620 / 780;
 }
+.hero__portrait img { position: absolute; inset: 0; }
+.hero__portrait .is-smile { opacity: 0; transition: opacity .45s var(--ease); }
+.hero.is-smiling .is-smile { opacity: 1; }
 .hero__name {
   position: absolute; left: calc(var(--pad) - 4px); bottom: 17svh;
   font-size: clamp(64px, 9.2vw, 132px); font-weight: 600; letter-spacing: -.05em; line-height: .92;
@@ -161,9 +164,7 @@ html:not(.js) .loader { display: none; }
 .hola__text .display { margin: -8px 0 12px -6px; }
 .status { display: flex; align-items: center; gap: 10px; color: var(--fg); margin-top: 24px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px var(--red); }
-.hola__portrait { position: relative; aspect-ratio: 560 / 720; }
-.hola__portrait img { position: absolute; inset: 0; }
-.hola__portrait .is-smile { opacity: 0; }
+.hola__portrait { aspect-ratio: 560 / 720; }
 
 /* ---------- 03 words ---------- */
 .words { position: relative; min-height: 100svh; padding: 96px 0 56px; display: flex; flex-direction: column; overflow: hidden; }
@@ -265,8 +266,7 @@ figcaption.label { margin-top: 12px; }
 .langs h3 { font-size: 28px; font-weight: 500; letter-spacing: -.02em; margin-bottom: 8px; }
 
 /* ---------- 09 likes ---------- */
-.likes { display: grid; grid-template-columns: 1fr minmax(0, 380px); gap: 64px; align-items: start; }
-.tags { display: flex; flex-wrap: wrap; gap: 12px; max-width: 860px; }
+.tags { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1100px; }
 .tags li {
   font: 400 14px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
   padding: 12px 16px; border: 1px solid var(--line); border-radius: 999px;
@@ -274,9 +274,6 @@ figcaption.label { margin-top: 12px; }
 }
 .tags li:hover { border-color: var(--fg); background: var(--surface); }
 .dream { font-size: 28px; font-weight: 500; letter-spacing: -.02em; margin-top: 64px; }
-.likes__photo { aspect-ratio: 380 / 460; overflow: hidden; border-radius: 4px; }
-.likes__photo img { filter: grayscale(1); transition: filter 1s var(--ease); }
-.likes__photo:hover img { filter: grayscale(0); }
 
 /* ---------- 10 contact ---------- */
 .contact { padding-bottom: 32px; }
@@ -291,7 +288,7 @@ figcaption.label { margin-top: 12px; }
 /* ---------- small screens ---------- */
 @media (max-width: 900px) {
   .nav__links { display: none; }
-  .hola, .school, .learning__grid, .likes { grid-template-columns: 1fr; }
+  .hola, .school, .learning__grid { grid-template-columns: 1fr; }
   .hola__portrait { max-width: 420px; }
   .words__viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
   .word { scroll-snap-align: start; }

@@ -20,8 +20,9 @@
   }));
 
   /* ---------- music ----------
-     Browsers block sound until the visitor interacts, so Marea starts on the
-     first click / tap / key anywhere. No popup. The button mutes and is remembered. */
+     Tries to play the moment the page opens. Most browsers block sound until the
+     visitor interacts, so if blocked it starts on the first click / tap / key.
+     No popup. The button mutes and is remembered. */
   const audio = $('audio');
   const player = $('.player');
   const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -40,7 +41,7 @@
   const setPlaying = (on) => { player.classList.toggle('is-playing', on); player.setAttribute('aria-pressed', on); };
   const play = () => {
     audio.volume = 0;
-    audio.play().then(() => { setPlaying(true); fade(0.8, 2000); }).catch(() => {});
+    return audio.play().then(() => { setPlaying(true); fade(0.8, 2000); return true; }).catch(() => false);
   };
   const stop = () => fade(0, 500, () => { audio.pause(); setPlaying(false); });
 
@@ -49,12 +50,15 @@
   player.addEventListener('click', () => {
     if (audio.paused) { store.set('muted', '0'); play(); } else { store.set('muted', '1'); stop(); }
   });
-  const firstTouch = (e) => {
-    ['pointerdown', 'keydown'].forEach((t) => window.removeEventListener(t, firstTouch, true));
-    if (player.contains(e.target) || store.get('muted') === '1') return; // the button handles itself
-    play();
-  };
-  ['pointerdown', 'keydown'].forEach((t) => window.addEventListener(t, firstTouch, true));
+  // scrolling alone never counts as a gesture for browsers; these do
+  const gestures = ['pointerdown', 'pointerup', 'touchend', 'keydown'];
+  const stopListening = () => gestures.forEach((t) => window.removeEventListener(t, onGesture, true));
+  function onGesture(e) {
+    if (player.contains(e.target) || store.get('muted') === '1' || !audio.paused) return stopListening(); // the button handles itself
+    play().then((ok) => ok && stopListening());
+  }
+  gestures.forEach((t) => window.addEventListener(t, onGesture, true));
+  if (store.get('muted') !== '1') play().then((ok) => ok && stopListening()); // works when the browser allows autoplay
 
   /* ---------- loader ---------- */
   const loader = $('.loader');
@@ -83,16 +87,21 @@
   function heroIn() {
     if (reduce) return;
     gsap.timeline()
-      .from('.hero__portrait img', { scale: 1.12, opacity: 0, duration: 2, ease: 'expo.out' })
+      .from('.hero__portrait', { scale: 1.12, opacity: 0, duration: 2, ease: 'expo.out' })
       .from('.hero__name .line > span', { yPercent: 110, duration: 1.2, stagger: 0.08, ease: 'expo.out' }, 0.15)
       .from('.nav', { y: -20, opacity: 0, duration: 1, ease: 'expo.out' }, 0.3)
       .from(['.hero__words', '.hero .label', '.player'], { opacity: 0, y: 12, duration: 1, stagger: 0.05, ease: 'power2.out' }, 0.5);
   }
 
+  /* hero: the portrait smiles on the first scroll down, serious again back at the top */
+  const hero = $('.hero');
+  const smile = (y) => hero.classList.toggle('is-smiling', y > 4);
+  lenis ? lenis.on('scroll', (l) => smile(l.scroll)) : addEventListener('scroll', () => smile(scrollY), { passive: true });
+
   if (reduce) return; // everything below is motion
 
   /* ---------- generic reveals ---------- */
-  const reveals = $$('[data-reveal]').filter((el) => !el.closest('.hola'));
+  const reveals = $$('[data-reveal]');
   gsap.set(reveals, { opacity: 0, y: 28 });
   ScrollTrigger.batch(reveals, {
     start: 'top 88%', once: true,
@@ -125,13 +134,6 @@
 
   /* ---------- desktop-only pinned scenes ---------- */
   gsap.matchMedia().add('(min-width: 901px)', () => {
-    /* Hola: text arrives, then the portrait smiles (Çağdaş) */
-    gsap.timeline({ scrollTrigger: { trigger: '.hola', start: 'top top', end: '+=130%', pin: true, scrub: 1 } })
-      .from('.hola [data-reveal]', { opacity: 0, y: 40, stagger: 0.1, duration: 0.5, ease: 'power2.out' })
-      .from('.hola__portrait', { scale: 1.05, duration: 1, ease: 'none' }, 0)
-      .to('.hola .is-smile', { opacity: 1, duration: 0.25, ease: 'none' }, 0.55)
-      .to({}, { duration: 0.3 });
-
     /* Five words: vertical scroll moves the track sideways, and it ends */
     const track = $('.words__track');
     const pad = () => parseFloat(getComputedStyle($('.words__viewport')).paddingLeft);

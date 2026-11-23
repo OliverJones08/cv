@@ -50,7 +50,11 @@
     <!-- 01 · Hero -->
     <section class="hero" id="top">
       <p class="label hero__tl">CV — 2026</p>
-      <figure class="hero__portrait mask-soft"><img src="assets/me-serious.jpg" alt="Portrait of Oliver Jones"></figure>
+      <!-- the portrait smiles on the first scroll down (Çağdaş) -->
+      <figure class="hero__portrait mask-soft">
+        <img class="is-serious" src="assets/me-serious.jpg" alt="Portrait of Oliver Jones">
+        <img class="is-smile" src="assets/me-smile.jpg" alt="">
+      </figure>
       <h1 class="hero__name" data-lines>
         <span class="line"><span>Oliver</span></span>
         <span class="line"><span>Jones</span></span>
@@ -61,7 +65,7 @@
       <p class="label hero__vert">Buenos Aires — Argentina</p>
     </section>
 
-    <!-- 02 · Hola: the portrait goes from serious to smiling as you scroll -->
+    <!-- 02 · Hola -->
     <section class="hola" id="about">
       <div class="hola__text">
         <p class="label" data-reveal>01 / About</p>
@@ -70,10 +74,7 @@
         <p class="body" data-reveal>Since I was 4 I've played rugby as a hooker at BACRC. I like to know how everything works.</p>
         <p class="label status" data-reveal><i class="dot"></i>Building something right now</p>
       </div>
-      <figure class="hola__portrait mask-soft">
-        <img class="is-serious" src="assets/me-serious.jpg" alt="">
-        <img class="is-smile" src="assets/me-smile.jpg" alt="Oliver smiling">
-      </figure>
+      <figure class="hola__portrait mask-soft" data-reveal><img src="assets/asado.jpg" alt="Oliver at an asado" loading="lazy"></figure>
     </section>
 
     <!-- 03 · Five words: vertical scroll moves sideways, and it ends -->
@@ -232,7 +233,7 @@
 
     <!-- 09 · Things I like -->
     <section class="likes section" id="likes">
-      <div>
+      <div class="likes__inner">
         <header class="sec-head">
           <p class="label" data-reveal>08 / Off the clock</p>
           <h2 class="h2" data-reveal>Things I like.</h2>
@@ -243,7 +244,6 @@
         </ul>
         <p class="dream" data-reveal>Dream: being part of a special forces unit.</p>
       </div>
-      <figure class="likes__photo" data-reveal><img src="assets/asado.jpg" alt="Oliver at an asado" loading="lazy"></figure>
     </section>
 
     <!-- 10 · Contact -->
