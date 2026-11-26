@@ -39,9 +39,11 @@
     fadeRaf = requestAnimationFrame(step);
   };
   const setPlaying = (on) => { player.classList.toggle('is-playing', on); player.setAttribute('aria-pressed', on); };
+  // starts at full volume, no fade-in
   const play = () => {
-    audio.volume = 0;
-    return audio.play().then(() => { setPlaying(true); fade(0.8, 2000); return true; }).catch(() => false);
+    cancelAnimationFrame(fadeRaf);
+    audio.volume = 1;
+    return audio.play().then(() => { setPlaying(true); return true; }).catch(() => false);
   };
   const stop = () => fade(0, 500, () => { audio.pause(); setPlaying(false); });
 
@@ -51,9 +53,34 @@
     if (audio.paused) { store.set('muted', '0'); play(); } else { store.set('muted', '1'); stop(); }
   });
 
+  /* ---------- language ----------
+     English by default, Spanish when the computer is in Spanish; the EN/ES switch wins and is remembered.
+     Each translatable element holds its Spanish HTML in data-es; the English is read from the page. */
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const enterText = { en: coarse ? 'Tap to enter' : 'Click to enter', es: coarse ? 'Tocá para entrar' : 'Click para entrar' };
+  const i18n = $$('[data-es]');
+  i18n.forEach((el) => (el.dataset.en = el.innerHTML));
+  const langBtn = $('.lang');
+  const setLang = (l) => {
+    document.documentElement.lang = l;
+    i18n.forEach((el) => (el.innerHTML = el.dataset[l]));
+    const enter = $('.loader__enter .t');
+    if (enter) enter.textContent = enterText[l];
+    $$('[data-l]', langBtn).forEach((s) => s.classList.toggle('is-on', s.dataset.l === l));
+    langBtn.setAttribute('aria-label', l === 'es' ? 'Switch to English' : 'Cambiar a español');
+  };
+  let lang = store.get('lang') || (/^es\b/i.test(navigator.language || '') ? 'es' : 'en');
+  setLang(lang);
+  langBtn.addEventListener('click', () => {
+    lang = lang === 'es' ? 'en' : 'es';
+    store.set('lang', lang);
+    setLang(lang);
+    ScrollTrigger.refresh(); // text lengths change, so pinned scenes re-measure
+  });
+
   /* ---------- loader ---------- */
   const loader = $('.loader');
-  const countEl = $('.loader__count span');
+  const countEl = $('.loader__count .n');
   const imgs = $$('img').filter((i) => i.loading !== 'lazy');
   let loaded = 0;
   const progress = { v: 0 };
@@ -65,8 +92,7 @@
   const minTime = new Promise((r) => setTimeout(r, reduce ? 0 : 1800));
 
   lenis && lenis.stop();
-  const enterLabel = $('.loader__enter');
-  if (matchMedia('(pointer: coarse)').matches) enterLabel.textContent = 'Tap to enter';
+  if (!reduce) gsap.from('.loader__name .line > span', { yPercent: 110, duration: 1.2, stagger: 0.08, ease: 'expo.out', delay: 0.1 });
 
   // at 100% the ring waits; the click / tap / key that enters is the one that starts Marea
   Promise.all([ready, minTime, document.fonts.ready]).then(() => {
@@ -88,23 +114,48 @@
     entered = true;
     loader.removeEventListener('click', enter);
     window.removeEventListener('keydown', enter);
-    if (store.get('muted') !== '1') play(); // called inside the gesture, so every browser allows it
+    const withSong = store.get('muted') !== '1';
+    if (withSong) play(); // called inside the gesture, so every browser allows it
     loader.classList.remove('is-ready');
     gsap.timeline({ onComplete: () => { loader.remove(); lenis && lenis.start(); ScrollTrigger.refresh(); } })
       .to('.loader__ring', { scale: 1.6, opacity: 0, duration: 1.2, ease: 'expo.inOut' })
       .to('.loader__beam', { scaleX: 0, opacity: 0, duration: 0.8, ease: 'expo.inOut' }, '<')
-      .to(['.loader__name', '.loader__enter'], { y: -24, opacity: 0, duration: 0.6, ease: 'power2.in' }, '<')
+      .to('.loader__name .line > span', { yPercent: -110, duration: 0.8, stagger: 0.06, ease: 'expo.in' }, '<')
+      .to(['.loader__foot', '.loader .label'], { opacity: 0, duration: 0.4, ease: 'power2.in' }, '<')
       .to(loader, { opacity: 0, duration: 0.6 }, '-=0.4')
-      .add(heroIn, '-=0.5');
+      .add(withSong ? nowPlaying : () => heroIn(true), '-=0.5');
   }
 
-  function heroIn() {
+  /* the song takes the screen, then the card shrinks into the player's cover (FLIP) */
+  function nowPlaying() {
+    const np = $('.np');
+    if (reduce) { np.remove(); return; }
+    const card = $('.np__card'), cover = $('.np__cover');
+    gsap.set(np, { visibility: 'visible' });
+    gsap.set(player, { opacity: 0 });
+    gsap.timeline()
+      .fromTo(cover, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 1, ease: 'expo.out' })
+      .fromTo('.np__text > *', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.08, ease: 'expo.out' }, 0.15)
+      .add(() => {
+        const to = $('.player__cover').getBoundingClientRect(), from = cover.getBoundingClientRect(), c = card.getBoundingClientRect();
+        gsap.timeline({ onComplete: () => np.remove() })
+          .to('.np__text', { opacity: 0, x: -20, duration: 0.4, ease: 'power2.in' })
+          .to(card, { x: to.left - from.left, y: to.top - from.top, scale: to.width / from.width,
+                      transformOrigin: `${from.left - c.left}px ${from.top - c.top}px`, duration: 1.1, ease: 'expo.inOut' }, 0.1)
+          .to(np, { backgroundColor: 'rgba(0,0,0,0)', duration: 0.9, ease: 'power2.inOut' }, 0.1)
+          .add(() => heroIn(false), 0.3)
+          .to(player, { opacity: 1, duration: 0.3 }, 1.05)
+          .to(card, { opacity: 0, duration: 0.25 }, 1.05);
+      }, '+=1.3');
+  }
+
+  function heroIn(withPlayer) {
     if (reduce) return;
     gsap.timeline()
       .from('.hero__portrait', { scale: 1.12, opacity: 0, duration: 2, ease: 'expo.out' })
       .from('.hero__name .line > span', { yPercent: 110, duration: 1.2, stagger: 0.08, ease: 'expo.out' }, 0.15)
       .from('.nav', { y: -20, opacity: 0, duration: 1, ease: 'expo.out' }, 0.3)
-      .from(['.hero__words', '.hero .label', '.player'], { opacity: 0, y: 12, duration: 1, stagger: 0.05, ease: 'power2.out' }, 0.5);
+      .from(['.hero__words', '.hero .label', ...(withPlayer ? ['.player'] : [])], { opacity: 0, y: 12, duration: 1, stagger: 0.05, ease: 'power2.out' }, 0.5);
   }
 
   /* hero: the portrait smiles on the first scroll down, serious again back at the top */
@@ -119,7 +170,58 @@
   };
   lenis ? lenis.on('scroll', (l) => smile(l.scroll)) : addEventListener('scroll', () => smile(scrollY), { passive: true });
 
+  /* ---------- details: anything with data-detail opens its article in the drawer ---------- */
+  const dlg = $('.detail');
+  const openDetail = (id) => {
+    $$('article', dlg).forEach((a) => (a.hidden = a.id !== id));
+    dlg.showModal();
+    dlg.scrollTop = 0;
+    lenis && lenis.stop();
+    if (!reduce) gsap.fromTo(dlg, { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: 'expo.out' });
+  };
+  $$('[data-detail]').forEach((el) => {
+    if (el.tagName !== 'BUTTON') { el.tabIndex = 0; el.setAttribute('role', 'button'); }
+    el.addEventListener('click', () => openDetail(el.dataset.detail));
+    el.addEventListener('keydown', (e) => {
+      if (el.tagName !== 'BUTTON' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDetail(el.dataset.detail); }
+    });
+  });
+  $('.detail__close').addEventListener('click', () => dlg.close());
+  // a click on the backdrop (left of the drawer) closes it; Esc is native
+  dlg.addEventListener('click', (e) => { if (e.clientX < dlg.getBoundingClientRect().left) dlg.close(); });
+  dlg.addEventListener('close', () => lenis && lenis.start());
+  // Esc is native for <dialog>, but some browsers skip it without a fresh gesture, so handle it too
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && dlg.open) dlg.close(); });
+
+  /* ---------- sports net: rugby in the middle, a line to each sport and a ring around them ---------- */
+  const board = $('.net__board');
+  const svg = $('.net__lines');
+  const nodes = $$('.net__node', board);
+  const ring = nodes.slice(1);
+  const pairs = [...ring.map((n) => [nodes[0], n]), ...ring.map((n, i) => [n, ring[(i + 1) % ring.length]])];
+  const lines = pairs.map(([a, b], i) => {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    if (i < ring.length) l.classList.add('spoke');
+    svg.append(l);
+    return { l, a, b };
+  });
+  // left/top are the node centers (they're centered with translate, which offsetLeft ignores)
+  const layoutNet = () => lines.forEach(({ l, a, b }) => {
+    const len = Math.hypot(b.offsetLeft - a.offsetLeft, b.offsetTop - a.offsetTop);
+    l.setAttribute('x1', a.offsetLeft); l.setAttribute('y1', a.offsetTop);
+    l.setAttribute('x2', b.offsetLeft); l.setAttribute('y2', b.offsetTop);
+    l.style.strokeDasharray = len;
+    l.dataset.len = len;
+  });
+  layoutNet();
+  addEventListener('resize', layoutNet);
+
   if (reduce) return; // everything below is motion
+
+  /* sports net draws itself as it arrives */
+  gsap.timeline({ scrollTrigger: { trigger: board, start: 'top 85%', end: 'center 55%', scrub: 1, invalidateOnRefresh: true } })
+    .fromTo(lines.map((x) => x.l), { strokeDashoffset: (i, el) => el.dataset.len }, { strokeDashoffset: 0, stagger: 0.04, ease: 'none' })
+    .fromTo(ring, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, stagger: 0.06, ease: 'back.out(2)' }, 0.15);
 
   /* ---------- generic reveals ---------- */
   const reveals = $$('[data-reveal]');
