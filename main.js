@@ -109,7 +109,14 @@
 
   /* hero: the portrait smiles on the first scroll down, serious again back at the top */
   const hero = $('.hero');
-  const smile = (y) => hero.classList.toggle('is-smiling', y > 4);
+  const face = $('.hero__portrait video');
+  face.play().then(() => { face.pause(); if (!hero.classList.contains('is-smiling')) face.currentTime = 0; }).catch(() => {}); // iOS only decodes frames after a (muted) play
+  const smile = (y) => {
+    if (hero.classList.contains('is-smiling') === y > 4) return;
+    hero.classList.toggle('is-smiling', y > 4);
+    // clip is all-keyframe, so scrubbing currentTime both ways is smooth
+    gsap.to(face, { currentTime: y > 4 ? (face.duration || 1) - 0.01 : 0, duration: 0.9, ease: 'power2.out', overwrite: true });
+  };
   lenis ? lenis.on('scroll', (l) => smile(l.scroll)) : addEventListener('scroll', () => smile(scrollY), { passive: true });
 
   if (reduce) return; // everything below is motion
