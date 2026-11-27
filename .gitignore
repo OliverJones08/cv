@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# full song (copyrighted): add locally, never commit
+public/media/marea.*
