@@ -205,6 +205,21 @@ export function Motion() {
       // Esc is native for <dialog>, but some browsers skip it without a fresh gesture, so handle it too
       addEventListener("keydown", (e) => { if (e.key === "Escape" && dlg.open) dlg.close(); }, on);
 
+      /* ---------- built: tap a folder to open it, tap again (or its document) to close ---------- */
+      const folders = $$(".folder");
+      const setOpen = (f: HTMLElement, open: boolean) => {
+        f.classList.toggle("is-open", open);
+        $(".folder__front", f).setAttribute("aria-expanded", String(open));
+      };
+      let jump: ((i: number) => void) | null = null; // desktop deck: a tab brings its folder to the front
+      folders.forEach((f, i) => {
+        $(".folder__front", f).addEventListener("click", () => setOpen(f, !f.classList.contains("is-open")), on);
+        $(".folder__back", f).addEventListener("click", (e) => {
+          if (!(e.target as Element).closest("a")) setOpen(f, false);
+        }, on);
+        $(".folder__tab", f).addEventListener("click", () => (jump ? jump(i) : setOpen(f, true)), on);
+      });
+
       /* ---------- sports net: rugby in the middle, a line to each sport and a ring around them ---------- */
       const board = $(".net__board");
       const nodes = $$(".net__node", board);
@@ -285,10 +300,33 @@ export function Motion() {
           },
         });
 
-        /* Built: cards arrive in depth */
-        $$(".project").forEach((p) => gsap.fromTo(p,
-          { opacity: 0, y: 140, rotateX: 16, scale: 0.9, transformOrigin: "50% 0%" },
-          { opacity: 1, y: 0, rotateX: 0, scale: 1, ease: "none", scrollTrigger: { trigger: p, start: "top 98%", end: "top 55%", scrub: 1 } }));
+        /* Built: the folders sit in a drawer, newest in front; scrolling pulls each one out and the next comes forward */
+        const cabinet = $(".cabinet");
+        cabinet.classList.add("cabinet--deck");
+        const n = folders.length;
+        const slot = (s: number) => ({ y: -s * 16, scale: 1 - s * 0.035 }); // further back = higher and smaller, so its tab shows
+        folders.forEach((f, i) => gsap.set(f, { ...slot(i), zIndex: n - i, transformOrigin: "50% 0%" }));
+        let front = 0;
+        const deck = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".built__stage", start: "top top", end: () => "+=" + innerHeight * 0.9 * (n - 1), pin: true, scrub: 1, invalidateOnRefresh: true,
+            onUpdate: (st) => {
+              const k = Math.round(st.progress * (n - 1));
+              if (k !== front) { front = k; folders.forEach((f) => setOpen(f, false)); } // a folder closes when it leaves the front
+            },
+          },
+        });
+        for (let k = 0; k < n - 1; k++) {
+          // slides down out of the drawer, solid until it is almost gone
+          deck.to(folders[k], { yPercent: 105, rotateX: -18, duration: 1, ease: "power2.in" }, k)
+            .to(folders[k], { opacity: 0, duration: 0.35, ease: "power1.in" }, k + 0.65);
+          for (let j = k + 1; j < n; j++) deck.to(folders[j], { ...slot(j - k - 1), duration: 1, ease: "power2.inOut" }, k);
+        }
+        jump = (i) => {
+          const st = deck.scrollTrigger!;
+          const y = st.start + ((st.end - st.start) * i) / (n - 1);
+          if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else scrollTo({ top: y, behavior: "smooth" });
+        };
 
         /* Sport: photo starts centered and big, slides to the right */
         const photo = $(".sport__photo");
@@ -297,6 +335,8 @@ export function Motion() {
         gsap.timeline({ scrollTrigger: { trigger: ".sport", start: "top top", end: "+=120%", pin: true, scrub: 1, invalidateOnRefresh: true } })
           .fromTo(photo, { x: toCenter }, { x: 0, duration: 1, ease: "power2.inOut" })
           .fromTo(".sport__text > *", { opacity: 0, y: 40 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.5, ease: "power2.out" }, 0.45);
+
+        return () => { cabinet.classList.remove("cabinet--deck"); jump = null; };
       });
 
       addEventListener("load", () => ScrollTrigger.refresh(), on);

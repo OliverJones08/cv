@@ -6,6 +6,7 @@
   --fg: #ededed;
   --mute: #a1a1a1;
   --red: #d71921;
+  --folder: #121212;
   --pad: clamp(20px, 3.9vw, 56px);
   --ease: cubic-bezier(.2, .7, .1, 1);
   --sans: var(--font-geist), "Geist", system-ui, -apple-system, sans-serif;
@@ -205,18 +206,74 @@ html:not(.js) .loader { display: none; }
 .progress i { position: absolute; inset: 0; background: var(--fg); transform-origin: left; transform: scaleX(.2); }
 
 /* ---------- 04 built ---------- */
-.projects { display: grid; grid-template-columns: 1fr 1fr; gap: 72px 24px; perspective: 1400px; }
-.project figure {
-  aspect-ratio: 652 / 408; overflow: hidden; border-radius: 6px; border: 1px solid var(--line); background: var(--surface);
-  margin-bottom: 24px;
+/* folders: a stack on phones (each one sticks a little lower), a drawer you flip through on desktop (.cabinet--deck, set in Motion) */
+.cabinet { --tab-h: 44px; --tab-w: max(24%, 150px); --h: 480px; display: grid; gap: 32px; }
+.folder { position: sticky; top: calc(84px + var(--i) * 14px); padding-top: var(--tab-h); perspective: 1800px; }
+.folder__tab {
+  position: absolute; top: 0; z-index: 1; left: calc(var(--i) * (100% - var(--tab-w)) / 3); /* 3 = folders - 1 */
+  width: var(--tab-w); height: calc(var(--tab-h) + 1px);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 18px;
+  background: var(--folder); border: 1px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0;
+  font: 400 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute);
+  white-space: nowrap; transition: color .3s, translate .5s var(--ease);
 }
-.project__link { display: block; cursor: pointer; }
-.project img { object-position: top center; transition: transform 1.2s var(--ease); }
-.project:hover img { transform: scale(1.03); }
-.project .role { color: var(--red); }
-.project h3 { font-size: 36px; font-weight: 500; letter-spacing: -.025em; line-height: 1.05; margin: 12px 0; }
-.project .desc { color: var(--mute); line-height: 1.5; max-width: 34em; }
-.project .stack { color: var(--fg); margin-top: 14px; }
+.folder__back {
+  position: relative; height: var(--h); overflow: hidden;
+  display: grid; grid-template-columns: 1fr; align-content: start; gap: 22px; padding: 22px;
+  background: var(--folder); border: 1px solid var(--line); border-radius: 12px;
+}
+/* the screenshot is the document inside, its top peeks out of the folder */
+.folder__doc {
+  aspect-ratio: 652 / 408; overflow: hidden; border-radius: 6px; border: 1px solid #333; background: var(--surface);
+  rotate: -1deg; box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+  transition: translate .7s var(--ease), rotate .7s var(--ease);
+}
+.folder__doc img { object-position: top center; }
+.folder__info { display: grid; gap: 14px; align-content: start; opacity: 0; translate: 0 12px; transition: opacity .5s var(--ease), translate .7s var(--ease); }
+.folder__info .desc { color: var(--mute); line-height: 1.5; }
+.folder__link { justify-self: start; color: var(--fg); border-bottom: 1px solid var(--mute); transition: border-color .3s; }
+.folder__link:hover { border-color: var(--fg); }
+.folder__front {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 26px 28px;
+  font: inherit; color: var(--fg); text-align: left; cursor: pointer;
+  background: linear-gradient(180deg, #1d1d1d, #141414 60%); border: 1px solid #2e2e2e; border-radius: 12px;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .06);
+  transform-origin: 50% 100%; transition: transform 1s var(--ease), opacity .6s;
+}
+.folder__front .role { color: var(--red); }
+.folder__num { position: absolute; top: 18px; right: 26px; font: 600 clamp(64px, 7vw, 112px)/.8 var(--sans); letter-spacing: -.06em; color: #262626; }
+.folder__name { font-size: clamp(36px, 4.4vw, 64px); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+.folder__foot { margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.folder__cta { display: inline-flex; align-items: center; gap: 10px; flex: none; font-size: 14px; font-weight: 500; padding: 9px 16px; border: 1px solid var(--line); border-radius: 999px; transition: border-color .3s, background .3s, color .3s; }
+.folder__cta i { font: 300 20px/1 var(--sans); font-style: normal; transition: rotate .4s var(--ease); }
+@media (max-width: 600px) {
+  .cabinet { --tab-w: 132px; }
+  .folder__tab { padding: 0 12px; font-size: 11px; }
+  .folder__num, .folder__stack { display: none; } /* the tab already has the number; the stack is inside */
+}
+/* hover: the document peeks up, the tab rises, the button lights up */
+.folder:hover .folder__doc { translate: 0 -10px; rotate: -2deg; }
+.folder:hover .folder__tab { color: var(--fg); translate: 0 -3px; }
+.folder__front:hover .folder__cta { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.folder__front:hover .folder__cta i { rotate: 90deg; }
+/* open: the front flap swings down and the document comes out */
+.folder.is-open .folder__front { transform: rotateX(-82deg); opacity: .35; }
+.folder.is-open .folder__info { opacity: 1; translate: 0 0; transition-delay: .25s; }
+.folder.is-open .folder__doc { rotate: 0deg; translate: 0 0; }
+@media (min-width: 901px) {
+  .cabinet { --h: clamp(360px, calc(100svh - 440px), 540px); }
+  /* the whole stage pins under the nav while the folders flip */
+  .built { padding-top: 0; }
+  .built__stage { padding-top: 104px; }
+  .built__stage .sec-head { margin-bottom: 40px; }
+  .folder__back { grid-template-columns: 1.4fr 1fr; gap: 32px; padding: 26px; }
+  .folder__info { padding-top: 6px; }
+}
+/* desktop deck: all folders in the same spot, GSAP moves them (see Motion) */
+.cabinet--deck { display: block; position: relative; height: calc(var(--h) + var(--tab-h) + 3 * 16px); }
+.cabinet--deck .folder { position: absolute; inset: auto 0 0 0; top: auto; }
+.built__stage { position: relative; }
 .also { color: var(--mute); margin-top: 72px; }
 
 /* ---------- 05 sport ---------- */
@@ -340,7 +397,6 @@ figcaption.label { margin-top: 12px; }
   .school, .learning__grid { grid-template-columns: 1fr; }
   .words__viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
   .word { scroll-snap-align: start; }
-  .projects { grid-template-columns: 1fr; gap: 56px; }
   .sport { height: auto; display: grid; gap: 40px; }
   .sport__photo { position: relative; inset: auto; width: 100%; }
   .post { height: auto; width: 100%; max-width: 460px; }

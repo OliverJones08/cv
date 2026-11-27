@@ -60,65 +60,85 @@ export function Words() {
   );
 }
 
-/* 03 · Built: cards arrive in depth */
-type Project = { name: string; img: StaticImageData; alt: string; href?: string; detail?: string; role: [string, string]; desc: [string, string]; stack: string };
+/* 03 · Built: folders stored in a drawer, newest first. Scrolling flips through them; tapping one opens it.
+   "since" is when each project's repo was created. */
+type Project = { name: string; img: StaticImageData; alt: string; href?: string; since: [string, string]; role: [string, string]; desc: [string, string]; stack: string };
 const projects: Project[] = [
   {
-    name: "Restoman", img: restoman, alt: "Restoman website", href: "https://restoman.com.ar",
-    role: ["My venture", "Mi emprendimiento"],
-    desc: ["Full-stack platform to run restaurants: QR menu, orders paid with Mercado Pago, kitchen and counter, analytics. Plus the launch campaigns (BIBIS, Poke & Roll Núñez).",
-           "Plataforma full-stack para gestionar restaurantes: menú QR, pedidos pagados con Mercado Pago, cocina y mostrador, analytics. Además, las campañas de lanzamiento (BIBIS, Poke & Roll Núñez)."],
-    stack: "Next.js · PostgreSQL · Marketing",
-  },
-  {
-    name: "Boutique de Viajes", img: boutique, alt: "Boutique de Viajes landing page", href: "https://boutiquedeviajes.com/landing",
-    role: ["For my mom", "Para mi mamá"],
-    desc: ["Platform for her travel agency. The agency builds the itinerary; the traveler opens it on the phone with a link and a PIN. Maps, offline mode, AI that imports PDFs.",
-           "Plataforma para su agencia de viajes. La agencia arma el itinerario; el viajero lo abre en el celular con un link y un PIN. Mapas, modo offline, IA que importa PDFs."],
-    stack: "Next.js 16 · Supabase · Claude AI",
-  },
-  {
-    name: "Patanazo", img: patanazo, alt: "Patanazo website", href: "https://patanazo.vercel.app",
+    name: "Patanazo", img: patanazo, alt: "Patanazo website", href: "https://patanazo.vercel.app", since: ["Oct 2026", "oct. 2026"],
     role: ["For my dad · Estudio Jones", "Para mi papá · Estudio Jones"],
     desc: ["Argentine real-estate platform: know the full cost (deed, fees, permits, construction) before you buy, build, renovate or rent.",
            "Plataforma inmobiliaria argentina: conocé el costo total (escritura, honorarios, permisos, obra) antes de comprar, construir, reformar o alquilar."],
     stack: "Next.js 16 · Drizzle · Supabase",
   },
   {
-    name: "C3PO", img: c3po, alt: "Unitree G1 humanoid robot", detail: "d-c3po",
+    name: "Boutique de Viajes", img: boutique, alt: "Boutique de Viajes landing page", href: "https://boutiquedeviajes.com/landing", since: ["Sep 2026", "sept. 2026"],
+    role: ["For my mom", "Para mi mamá"],
+    desc: ["Platform for her travel agency. The agency builds the itinerary; the traveler opens it on the phone with a link and a PIN. Maps, offline mode, AI that imports PDFs.",
+           "Plataforma para su agencia de viajes. La agencia arma el itinerario; el viajero lo abre en el celular con un link y un PIN. Mapas, modo offline, IA que importa PDFs."],
+    stack: "Next.js 16 · Supabase · Claude AI",
+  },
+  {
+    name: "C3PO", img: c3po, alt: "Unitree G1 humanoid robot", since: ["May 2026", "may. 2026"],
     role: ["ORT final project", "Proyecto final ORT"],
     desc: ["An embodiment layer for LLMs: it gives Claude a Unitree G1 humanoid body. The same code drives the simulator and the real robot.",
            "Una capa de embodiment para LLMs: le da a Claude un cuerpo de humanoide Unitree G1. El mismo código maneja el simulador y el robot real."],
     stack: "SvelteKit · Python · ROS 2 · MCP",
   },
+  {
+    name: "Restoman", img: restoman, alt: "Restoman website", href: "https://restoman.com.ar", since: ["Aug 2025", "ago. 2025"],
+    role: ["My venture", "Mi emprendimiento"],
+    desc: ["Full-stack platform to run restaurants: QR menu, orders paid with Mercado Pago, kitchen and counter, analytics. Plus the launch campaigns (BIBIS, Poke & Roll Núñez).",
+           "Plataforma full-stack para gestionar restaurantes: menú QR, pedidos pagados con Mercado Pago, cocina y mostrador, analytics. Además, las campañas de lanzamiento (BIBIS, Poke & Roll Núñez)."],
+    stack: "Next.js · PostgreSQL · Marketing",
+  },
 ];
 
 export function Built() {
+  const n = projects.length;
   return (
     <section className="built section" id="built">
-      <header className="sec-head">
-        <p className="label" data-reveal><T en="02 / Built" es="02 / Proyectos" /></p>
-        <h2 className="h2" data-reveal>
-          <T en={<>Things I&apos;ve built,<br /><span className="soft">for real people.</span></>} es={<>Cosas que construí,<br /><span className="soft">para gente real.</span></>} />
-        </h2>
-      </header>
-      <div className="projects">
-        {projects.map((p) => {
-          const fig = <figure><Image src={p.img} alt={p.alt} sizes={half} /></figure>;
-          return (
-            <article className="project" key={p.name}>
-              {p.href ? (
-                <a className="project__link" href={p.href} target="_blank" rel="noopener">{fig}</a>
-              ) : (
-                <div className="project__link" data-detail={p.detail}>{fig}</div>
-              )}
-              <p className="label role"><T en={p.role[0]} es={p.role[1]} /></p>
-              <h3>{p.name}</h3>
-              <p className="desc"><T en={p.desc[0]} es={p.desc[1]} /></p>
-              <p className="label stack">{p.stack}</p>
-            </article>
-          );
-        })}
+      <div className="built__stage">
+        <header className="sec-head">
+          <p className="label" data-reveal><T en="02 / Built" es="02 / Proyectos" /></p>
+          <h2 className="h2" data-reveal>
+            <T en={<>Things I&apos;ve built,<br /><span className="soft">for real people.</span></>} es={<>Cosas que construí,<br /><span className="soft">para gente real.</span></>} />
+          </h2>
+        </header>
+        <div className="cabinet">
+          {projects.map((p, i) => {
+            const num = String(n - i).padStart(2, "0");
+            return (
+              <article className="folder" key={p.name} style={{ "--i": i } as CSSProperties}>
+                <button className="folder__tab" type="button" tabIndex={-1} aria-hidden="true">
+                  <span>{num}</span>
+                  <span><T en={p.since[0]} es={p.since[1]} /></span>
+                </button>
+                <div className="folder__back">
+                  <figure className="folder__doc"><Image src={p.img} alt={p.alt} sizes={half} /></figure>
+                  <div className="folder__info">
+                    <p className="desc"><T en={p.desc[0]} es={p.desc[1]} /></p>
+                    <p className="label fg">{p.stack}</p>
+                    {p.href && (
+                      <a className="folder__link" href={p.href} target="_blank" rel="noopener">
+                        <T en="Visit the site ↗" es="Ver el sitio ↗" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <button className="folder__front" type="button" aria-expanded="false">
+                  <span className="folder__num" aria-hidden="true">{num}</span>
+                  <span className="label role"><T en={p.role[0]} es={p.role[1]} /></span>
+                  <span className="folder__name">{p.name}</span>
+                  <span className="folder__foot">
+                    <span className="label"><T en={p.since[0]} es={p.since[1]} /><span className="folder__stack"> · {p.stack}</span></span>
+                    <span className="folder__cta"><T en="Open" es="Abrir" /><i aria-hidden="true">+</i></span>
+                  </span>
+                </button>
+              </article>
+            );
+          })}
+        </div>
       </div>
       <p className="also" data-reveal>
         <T
