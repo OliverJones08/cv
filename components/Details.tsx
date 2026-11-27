@@ -112,6 +112,7 @@ export function Details() {
           />
         </p>
         <p className="label fg">SvelteKit · Python · ROS 2 · MCP</p>
+        <p><a className="detail__link" href="https://c3po-web.vercel.app" target="_blank" rel="noopener"><T en="Visit the site ↗" es="Ver el sitio ↗" /></a></p>
         <Media pics={[[c3po, "Unitree G1 humanoid robot"]]} />
       </Item>
 

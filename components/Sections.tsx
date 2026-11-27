@@ -79,7 +79,7 @@ const projects: Project[] = [
     stack: "Next.js 16 · Supabase · Claude AI",
   },
   {
-    name: "C3PO", img: c3po, alt: "Unitree G1 humanoid robot", since: ["May 2026", "may. 2026"],
+    name: "C3PO", img: c3po, alt: "Unitree G1 humanoid robot", href: "https://c3po-web.vercel.app", since: ["May 2026", "may. 2026"],
     role: ["ORT final project", "Proyecto final ORT"],
     desc: ["An embodiment layer for LLMs: it gives Claude a Unitree G1 humanoid body. The same code drives the simulator and the real robot.",
            "Una capa de embodiment para LLMs: le da a Claude un cuerpo de humanoide Unitree G1. El mismo código maneja el simulador y el robot real."],
