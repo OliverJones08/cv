@@ -1,6 +1,7 @@
 import { Loader, Nav, Player, Hero } from "@/components/Intro";
-import { Words, Built, Sport, Net, School, Learning, World, Likes, Contact } from "@/components/Sections";
+import { Built, Sport, Net, School, Learning, World, Likes, Contact } from "@/components/Sections";
 import { Details } from "@/components/Details";
+import { WhoList } from "@/components/Who";
 import { Motion } from "@/components/Motion";
 
 export default function Home() {
@@ -11,7 +12,7 @@ export default function Home() {
       <Player />
       <main>
         <Hero />
-        <Words />
+        <WhoList />
         <Built />
         <Sport />
         <Net />

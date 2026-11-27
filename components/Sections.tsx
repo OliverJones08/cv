@@ -8,7 +8,6 @@ import c3po from "@/assets/c3po.jpg";
 import rugbyPost from "@/assets/rugby-post.jpg";
 import presenting from "@/assets/presenting.jpg";
 import ticx26 from "@/assets/ticx26.jpg";
-import certificates from "@/assets/certificates.jpg";
 import nyc from "@/assets/nyc.jpg";
 import devconnect from "@/assets/devconnect.jpg";
 import colosseum from "@/assets/colosseum.jpg";
@@ -17,67 +16,15 @@ import navona from "@/assets/navona.jpg";
 import cambridgeC1 from "@/assets/certs/cambridge-c1.jpg";
 import itbaEssay from "@/assets/certs/itba-essay.jpg";
 import claudeCodeInAction from "@/assets/certs/claude-code-in-action.jpg";
-import codesignalJs from "@/assets/certs/codesignal-js.jpg";
+import rugbyCelebration from "@/assets/sports/rugby-celebration.jpg";
+import rugbyLineout from "@/assets/sports/rugby-lineout.jpg";
 
 const half = "(max-width: 900px) 100vw, 50vw";
 
-/* 02 · Five words: vertical scroll moves sideways, and it ends */
-const words: [en: string, es: string, enText: string, esText: string][] = [
-  ["curious", "curioso", "I want to know how everything works, even reverse-engineering a humanoid robot's control API.", "Quiero saber cómo funciona todo, hasta hacer ingeniería inversa de la API de control de un robot humanoide."],
-  ["open-minded", "de mente abierta", "Tech, business, law and design: apps, a marketing plan, a draft bill on AI in education.", "Tecnología, negocios, derecho y diseño: apps, un plan de marketing, un proyecto de ley sobre IA en la educación."],
-  ["empathetic", "empático", "I build for the people around me: my mom's agency, my dad's studio, a home cloud for my family.", "Construyo para la gente que me rodea: la agencia de mi mamá, el estudio de mi papá, una nube casera para mi familia."],
-  ["active", "activo", "Rugby since I was 4, six other sports, travel, competitions. Always doing something.", "Rugby desde los 4, otros seis deportes, viajes, competencias. Siempre haciendo algo."],
-  ["responsible", "responsable", "The apps I build run real businesses with real people's data, so I treat them that way.", "Las apps que hago manejan negocios reales con datos de gente real, así que las trato así."],
-];
-
-export function Words() {
-  return (
-    <section className="words" id="words">
-      <div className="words__head">
-        <div>
-          <p className="label"><T en="01 / In five words" es="01 / En cinco palabras" /></p>
-          <h2 className="h2"><T en="Who I am." es="Quién soy." /></h2>
-        </div>
-        <p className="label words__count"><span>01</span> — 05</p>
-      </div>
-      <div className="words__viewport">
-        <div className="words__track">
-          {words.map(([en, es, enText, esText], i) => (
-            <article className="word" key={en}>
-              <p className="label">{String(i + 1).padStart(2, "0")}</p>
-              <div>
-                <h3><T en={en} es={es} /></h3>
-                {/* the other language, small, under the word */}
-                <p className="label"><T en={es} es={en} /></p>
-                <p><T en={enText} es={esText} /></p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-      <div className="progress" aria-hidden="true"><i /></div>
-    </section>
-  );
-}
-
-/* 03 · Built: folders stored in a drawer, newest first. Scrolling flips through them; tapping one opens it.
-   "since" is when each project's repo was created. */
+/* 03 · Built: folders stored in a drawer. Scrolling flips through them; tapping one opens it.
+   Order: the robot first, then Restoman, then the rest. "since" is when each project's repo was created. */
 type Project = { name: string; img: StaticImageData; alt: string; href?: string; since: [string, string]; role: [string, string]; desc: [string, string]; stack: string };
 const projects: Project[] = [
-  {
-    name: "Patanazo", img: patanazo, alt: "Patanazo website", href: "https://patanazo.vercel.app", since: ["Oct 2026", "oct. 2026"],
-    role: ["For my dad · Estudio Jones", "Para mi papá · Estudio Jones"],
-    desc: ["Argentine real-estate platform: know the full cost (deed, fees, permits, construction) before you buy, build, renovate or rent.",
-           "Plataforma inmobiliaria argentina: conocé el costo total (escritura, honorarios, permisos, obra) antes de comprar, construir, reformar o alquilar."],
-    stack: "Next.js 16 · Drizzle · Supabase",
-  },
-  {
-    name: "Boutique de Viajes", img: boutique, alt: "Boutique de Viajes landing page", href: "https://boutiquedeviajes.com/landing", since: ["Sep 2026", "sept. 2026"],
-    role: ["For my mom", "Para mi mamá"],
-    desc: ["Platform for her travel agency. The agency builds the itinerary; the traveler opens it on the phone with a link and a PIN. Maps, offline mode, AI that imports PDFs.",
-           "Plataforma para su agencia de viajes. La agencia arma el itinerario; el viajero lo abre en el celular con un link y un PIN. Mapas, modo offline, IA que importa PDFs."],
-    stack: "Next.js 16 · Supabase · Claude AI",
-  },
   {
     name: "C3PO", img: c3po, alt: "Unitree G1 humanoid robot", href: "https://c3po-web.vercel.app", since: ["May 2026", "may. 2026"],
     role: ["ORT final project", "Proyecto final ORT"],
@@ -92,10 +39,23 @@ const projects: Project[] = [
            "Plataforma full-stack para gestionar restaurantes: menú QR, pedidos pagados con Mercado Pago, cocina y mostrador, analytics. Además, las campañas de lanzamiento (BIBIS, Poke & Roll Núñez)."],
     stack: "Next.js · PostgreSQL · Marketing",
   },
+  {
+    name: "Boutique de Viajes", img: boutique, alt: "Boutique de Viajes landing page", href: "https://boutiquedeviajes.com/landing", since: ["Sep 2026", "sept. 2026"],
+    role: ["For my mom", "Para mi mamá"],
+    desc: ["Platform for her travel agency. The agency builds the itinerary; the traveler opens it on the phone with a link and a PIN. Maps, offline mode, AI that imports PDFs.",
+           "Plataforma para su agencia de viajes. La agencia arma el itinerario; el viajero lo abre en el celular con un link y un PIN. Mapas, modo offline, IA que importa PDFs."],
+    stack: "Next.js 16 · Supabase · Claude AI",
+  },
+  {
+    name: "Patanazo", img: patanazo, alt: "Patanazo website", href: "https://patanazo.vercel.app", since: ["Oct 2026", "oct. 2026"],
+    role: ["For my dad · Estudio Jones", "Para mi papá · Estudio Jones"],
+    desc: ["Argentine real-estate platform: know the full cost (deed, fees, permits, construction) before you buy, build, renovate or rent.",
+           "Plataforma inmobiliaria argentina: conocé el costo total (escritura, honorarios, permisos, obra) antes de comprar, construir, reformar o alquilar."],
+    stack: "Next.js 16 · Drizzle · Supabase",
+  },
 ];
 
 export function Built() {
-  const n = projects.length;
   return (
     <section className="built section" id="built">
       <div className="built__stage">
@@ -107,7 +67,7 @@ export function Built() {
         </header>
         <div className="cabinet">
           {projects.map((p, i) => {
-            const num = String(n - i).padStart(2, "0");
+            const num = String(i + 1).padStart(2, "0");
             return (
               <article className="folder" key={p.name} style={{ "--i": i } as CSSProperties}>
                 <button className="folder__tab" type="button" tabIndex={-1} aria-hidden="true">
@@ -115,26 +75,27 @@ export function Built() {
                   <span><T en={p.since[0]} es={p.since[1]} /></span>
                 </button>
                 <div className="folder__back">
-                  <figure className="folder__doc"><Image src={p.img} alt={p.alt} sizes={half} /></figure>
+                  {/* the whole screenshot shows; only the info under it is covered by the flap */}
+                  <figure className="folder__doc"><Image src={p.img} alt={p.alt} sizes="(max-width: 900px) 100vw, 60vw" /></figure>
                   <div className="folder__info">
                     <p className="desc"><T en={p.desc[0]} es={p.desc[1]} /></p>
-                    <p className="label fg">{p.stack}</p>
-                    {p.href && (
-                      <a className="folder__link" href={p.href} target="_blank" rel="noopener">
-                        <T en="Visit the site ↗" es="Ver el sitio ↗" />
-                      </a>
-                    )}
+                    <p className="folder__meta">
+                      <span className="label fg">{p.stack}</span>
+                      {p.href && (
+                        <a className="folder__link" href={p.href} target="_blank" rel="noopener">
+                          <T en="Visit the site ↗" es="Ver el sitio ↗" />
+                        </a>
+                      )}
+                    </p>
                   </div>
-                </div>
-                <button className="folder__front" type="button" aria-expanded="false">
-                  <span className="folder__num" aria-hidden="true">{num}</span>
-                  <span className="label role"><T en={p.role[0]} es={p.role[1]} /></span>
-                  <span className="folder__name">{p.name}</span>
-                  <span className="folder__foot">
-                    <span className="label"><T en={p.since[0]} es={p.since[1]} /><span className="folder__stack"> · {p.stack}</span></span>
+                  <button className="folder__front" type="button" aria-expanded="false">
+                    <span className="folder__left">
+                      <span className="label role"><T en={p.role[0]} es={p.role[1]} /></span>
+                      <span className="folder__name">{p.name}</span>
+                    </span>
                     <span className="folder__cta"><T en="Open" es="Abrir" /><i aria-hidden="true">+</i></span>
-                  </span>
-                </button>
+                  </button>
+                </div>
               </article>
             );
           })}
@@ -184,34 +145,48 @@ export function Sport() {
   );
 }
 
-/* 04b · The other sports, as a net around rugby (lines draw with the scroll) */
-const at = (x: number, y: number) => ({ "--x": `${x}%`, "--y": `${y}%` }) as CSSProperties;
-const sports: [x: number, y: number, name: ReactNode][] = [
-  [30, 14, <T key="b" en="Boxing" es="Boxeo" />],
-  [70, 14, "Krav Maga"],
-  [88, 50, "Golf"],
-  [70, 86, <T key="t" en="Tennis" es="Tenis" />],
-  [30, 86, <T key="f" en="Football" es="Fútbol" />],
-  [12, 50, <><span><T en="Swimming" es="Natación" /></span><span className="label"><T en="school team" es="equipo del colegio" /></span></>],
+/* 04b · The other sports: a big net of cards around rugby that spins as you scroll (Method's connected photos).
+   Only rugby has real photos for now (England Rugby's); the other cards are type until there are photos. */
+type Sport = { en: string; es: string; note?: [string, string]; img?: StaticImageData; alt?: string };
+const ring: Sport[] = [
+  { en: "Boxing", es: "Boxeo" },
+  { en: "Krav Maga", es: "Krav Maga" },
+  { en: "Rugby", es: "Rugby", note: ["Lineout · BACRC", "Line · BACRC"], img: rugbyLineout, alt: "BACRC players throwing into a lineout at training" },
+  { en: "Golf", es: "Golf" },
+  { en: "Tennis", es: "Tenis" },
+  { en: "Football", es: "Fútbol" },
+  { en: "Swimming", es: "Natación", note: ["school team", "equipo del colegio"] },
 ];
 
 export function Net() {
   return (
-    <section className="net section" id="sports">
-      <header className="sec-head">
-        <p className="label" data-reveal><T en="More sports" es="Más deportes" /></p>
-        <h2 className="h2" data-reveal>
-          <T en={<>Rugby first.<br /><span className="soft">Six more around it.</span></>} es={<>Rugby primero.<br /><span className="soft">Seis más alrededor.</span></>} />
-        </h2>
-      </header>
-      <div className="net__board">
-        <svg className="net__lines" aria-hidden="true" />
-        <p className="net__node net__node--core" style={at(50, 50)}>
-          Rugby<span className="label"><T en="since 4 · BACRC" es="desde los 4 · BACRC" /></span>
-        </p>
-        {sports.map(([x, y, name]) => (
-          <p className="net__node" style={at(x, y)} key={`${x}-${y}`}>{name}</p>
-        ))}
+    <section className="net" id="sports">
+      <div className="net__stage">
+        <header className="sec-head">
+          <p className="label" data-reveal><T en="More sports" es="Más deportes" /></p>
+          <h2 className="h2" data-reveal>
+            <T en={<>Rugby first.<br /><span className="soft">Six more around it.</span></>} es={<>Rugby primero.<br /><span className="soft">Seis más alrededor.</span></>} />
+          </h2>
+        </header>
+        <div className="net__board">
+          <svg className="net__lines" aria-hidden="true" />
+          <figure className="net__card net__card--core">
+            <Image src={rugbyCelebration} alt="Oliver celebrating at a BACRC training with England Rugby" sizes="300px" />
+            <figcaption>
+              <span className="net__sport">Rugby</span>
+              <span className="label"><T en="since 4 · BACRC · photo: England Rugby" es="desde los 4 · BACRC · foto: England Rugby" /></span>
+            </figcaption>
+          </figure>
+          {ring.map((s) => (
+            <figure className={s.img ? "net__card net__card--photo" : "net__card"} key={s.en + (s.img ? "-photo" : "")}>
+              {s.img && <Image src={s.img} alt={s.alt!} sizes="240px" />}
+              <figcaption>
+                <span className="net__sport"><T en={s.en} es={s.es} /></span>
+                {s.note && <span className="label"><T en={s.note[0]} es={s.note[1]} /></span>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -227,10 +202,9 @@ const rows: [detail: string, when: string, title: ReactNode, text: ReactNode][] 
   ["d-northlands", "Northlands", <T key="7" en="Primary school" es="Primaria" />, <T key="8" en="A prize every year, mostly All-Round Excellence" es="Un premio todos los años, casi siempre All-Round Excellence" />],
 ];
 const diplomas: [detail: string, img: StaticImageData, alt: string][] = [
-  ["d-cambridge", cambridgeC1, "Cambridge C1 Advanced certificate"],
   ["d-itba", itbaEssay, "ITBA essay, first page"],
+  ["d-cae", cambridgeC1, "Cambridge C1 Advanced certificate"],
   ["d-anthropic", claudeCodeInAction, "Claude Code in Action certificate"],
-  ["d-codesignal", codesignalJs, "CodeSignal JavaScript certificate"],
 ];
 
 export function School() {
@@ -278,7 +252,6 @@ const courses: [detail: string | undefined, who: string, what: ReactNode][] = [
   ["d-cs50", "Harvard", <T key="1" en="CS50 (in progress) · first game: “The Eggy Road”" es="CS50 (en curso) · primer juego: “The Eggy Road”" />],
   ["d-ditella", "Universidad Di Tella", <T key="2" en="AI + Data Science + Business · predicted hospital readmissions" es="IA + Data Science + Negocios · predije reinternaciones hospitalarias" />],
   ["d-anthropic", "Anthropic", "Claude 101 · Claude Code 101 · Claude Code in Action · Claude Cowork"],
-  ["d-cambridge", "Cambridge", "Certificate in Advanced English · C1"],
   ["d-codesignal", "CodeSignal", <T key="3" en="HTML · CSS · JavaScript for front-end" es="HTML · CSS · JavaScript para front-end" />],
   [undefined, "J.P. Morgan", "Business finance · Grow your business"],
   ["d-semrush", "Semrush · Open University", "Marketing · IT in everyday life"],
@@ -303,7 +276,6 @@ export function Learning() {
           ))}
         </ul>
         <div className="learning__media">
-          <figure className="photo wide" data-reveal data-detail="d-all"><Image src={certificates} alt="Some of Oliver's certificates" sizes={half} /></figure>
           <figure className="photo" data-reveal>
             <Image src={nyc} alt="Tech Week New York 2026" sizes="(max-width: 900px) 50vw, 25vw" />
             <figcaption className="label">Tech Week New York 2026</figcaption>

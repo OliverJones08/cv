@@ -1,6 +1,7 @@
 import Image from "next/image";
 import cover from "@/assets/marea-cover.jpg";
 import { T, Ptr } from "./T";
+import { WhoAround } from "./Who";
 
 const Eq = () => (
   <span className="player__eq" aria-hidden="true">
@@ -51,7 +52,7 @@ export function Nav() {
     <header className="nav">
       <a className="nav__brand" href="#top">Oliver Jones</a>
       <nav className="nav__links" aria-label="Sections">
-        <a href="#words"><T en="About" es="Sobre mí" /></a>
+        <a href="#top"><T en="About" es="Sobre mí" /></a>
         <a href="#built"><T en="Built" es="Proyectos" /></a>
         <a href="#sport"><T en="Sport" es="Deporte" /></a>
         <a href="#school"><T en="School" es="Colegio" /></a>
@@ -121,6 +122,7 @@ export function Hero() {
       <p className="label hero__bl"><T en="Student · Builder · Rugby player" es="Estudiante · Builder · Jugador de rugby" /></p>
       <p className="label hero__scroll">Scroll</p>
       <p className="label hero__vert">Buenos Aires — Argentina</p>
+      <WhoAround />
     </section>
   );
 }

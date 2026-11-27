@@ -146,16 +146,6 @@ export function Details() {
         <Media pics={anthropic} />
       </Item>
 
-      <Item id="d-cambridge" label="Cambridge English" title={<T en="English · C1" es="Inglés · C1" />}>
-        <p>
-          <T
-            en="Certificate in Advanced English: C1, score 187 (December 2024). Before that, First Certificate in English: B2, score 162 (November 2022)."
-            es="Certificate in Advanced English: C1, 187 puntos (diciembre 2024). Antes, First Certificate in English: B2, 162 puntos (noviembre 2022)."
-          />
-        </p>
-        <Media pics={[c1, b2]} tall />
-      </Item>
-
       <Item id="d-cae" label={<T en="Cambridge English · December 2024" es="Cambridge English · diciembre 2024" />} title="C1 Advanced">
         <p><T en="Certificate in Advanced English, Grade C, Council of Europe level C1. Overall score: 187. Taken in Buenos Aires." es="Certificate in Advanced English, Grade C, nivel C1 del Marco Común Europeo. Puntaje general: 187. Rendido en Buenos Aires." /></p>
         <Scores s={[177, 182, 193, 190, 192]} />
@@ -178,10 +168,6 @@ export function Details() {
         <Media pics={marketing} />
       </Item>
 
-      <Item id="d-all" label={<T en="All of them" es="Todo junto" />} title={<T en="Certificates" es="Certificados" />}>
-        <p><T en="Tap one to see it full size. (The World Rugby ones aren't here because they show my ID number.)" es="Tocá uno para verlo en grande. (Los de World Rugby no están acá porque muestran mi DNI.)" /></p>
-        <Media pics={[c1, b2, ...anthropic, ...codesignal, ...marketing]} />
-      </Item>
     </dialog>
   );
 }

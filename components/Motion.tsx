@@ -172,8 +172,9 @@ export function Motion() {
       face.muted = true;
       // iOS only decodes frames after a (muted) play
       face.play().then(() => { face.pause(); if (!hero.classList.contains("is-smiling")) face.currentTime = 0; }).catch(() => {});
+      let heroPinned = false; // desktop: the pinned hero timeline scrubs the smile instead
       const smile = (y: number) => {
-        if (hero.classList.contains("is-smiling") === y > 4) return;
+        if (heroPinned || hero.classList.contains("is-smiling") === y > 4) return;
         hero.classList.toggle("is-smiling", y > 4);
         // clip is all-keyframe, so scrubbing currentTime both ways is smooth
         gsap.to(face, { currentTime: y > 4 ? (face.duration || 1) - 0.01 : 0, duration: 0.9, ease: "power2.out", overwrite: true });
@@ -215,39 +216,45 @@ export function Motion() {
       folders.forEach((f, i) => {
         $(".folder__front", f).addEventListener("click", () => setOpen(f, !f.classList.contains("is-open")), on);
         $(".folder__back", f).addEventListener("click", (e) => {
-          if (!(e.target as Element).closest("a")) setOpen(f, false);
+          if (!(e.target as Element).closest("a, .folder__front")) setOpen(f, false);
         }, on);
         $(".folder__tab", f).addEventListener("click", () => (jump ? jump(i) : setOpen(f, true)), on);
       });
 
-      /* ---------- sports net: rugby in the middle, a line to each sport and a ring around them ---------- */
+      /* ---------- sports net: rugby in the middle, the sports on a ring around it; scrolling spins the ring ---------- */
       const board = $(".net__board");
-      const nodes = $$(".net__node", board);
-      const ring = nodes.slice(1);
-      const pairs = [...ring.map((n) => [nodes[0], n]), ...ring.map((n, i) => [n, ring[(i + 1) % ring.length]])];
-      const lines = pairs.map(([a, b], i) => {
-        const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        if (i < ring.length) l.classList.add("spoke");
-        svg.append(l);
-        return { l, a, b };
-      });
-      // left/top are the node centers (they're centered with translate, which offsetLeft ignores)
-      const layoutNet = () => lines.forEach(({ l, a, b }) => {
-        const len = Math.hypot(b.offsetLeft - a.offsetLeft, b.offsetTop - a.offsetTop);
-        l.setAttribute("x1", String(a.offsetLeft)); l.setAttribute("y1", String(a.offsetTop));
-        l.setAttribute("x2", String(b.offsetLeft)); l.setAttribute("y2", String(b.offsetTop));
-        l.style.strokeDasharray = String(len);
-        l.dataset.len = String(len);
-      });
-      layoutNet();
-      addEventListener("resize", layoutNet, on);
+      const core = $(".net__card--core", board);
+      const ring = $$(".net__card:not(.net__card--core)", board);
+      const n7 = ring.length;
+      const mk = (cls?: string) => { const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); if (cls) l.classList.add(cls); svg.append(l); return l; };
+      const spokes = ring.map(() => mk("spoke"));
+      const rim = ring.map(() => mk());
+      const cross = ring.map(() => mk());
+      const setLine = (l: SVGLineElement, a: number[], b: number[]) => {
+        l.setAttribute("x1", String(a[0])); l.setAttribute("y1", String(a[1])); l.setAttribute("x2", String(b[0])); l.setAttribute("y2", String(b[1]));
+      };
+      // rot is the ring's turn in radians; cards lower on the ring are nearer: bigger, brighter, on top
+      const spin = (rot: number) => {
+        const W = board.clientWidth, H = board.clientHeight, c = [W / 2, H / 2];
+        const rx = Math.min(W * 0.46, 640), ry = H * 0.4;
+        gsap.set(core, { x: c[0], y: c[1], xPercent: -50, yPercent: -50 });
+        const pts = ring.map((card, i) => {
+          const a = -Math.PI / 2 + (i * 2 * Math.PI) / n7 + rot;
+          const depth = (Math.sin(a) + 1) / 2;
+          const p = [c[0] + rx * Math.cos(a), c[1] + ry * Math.sin(a)];
+          gsap.set(card, { x: p[0], y: p[1], xPercent: -50, yPercent: -50, scale: 0.78 + 0.32 * depth, opacity: 0.55 + 0.45 * depth, zIndex: 1 + Math.round(depth * 18) });
+          return p;
+        });
+        pts.forEach((p, i) => { setLine(spokes[i], c, p); setLine(rim[i], p, pts[(i + 1) % n7]); setLine(cross[i], p, pts[(i + 2) % n7]); });
+      };
+      let turn = 0;
+      spin(turn);
+      addEventListener("resize", () => spin(turn), on);
 
       if (reduce) return; // everything below is motion
 
-      /* sports net draws itself as it arrives */
-      gsap.timeline({ scrollTrigger: { trigger: board, start: "top 85%", end: "center 55%", scrub: 1, invalidateOnRefresh: true } })
-        .fromTo(lines.map((x) => x.l), { strokeDashoffset: (_i: number, el: SVGLineElement) => Number(el.dataset.len) }, { strokeDashoffset: 0, stagger: 0.04, ease: "none" })
-        .fromTo(ring, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, stagger: 0.06, ease: "back.out(2)" }, 0.15);
+      /* sports net: the ring turns as the section scrolls by (pinned on desktop, below) */
+      const spinWith = (st: ScrollTrigger) => { turn = st.progress * Math.PI * 1.15; spin(turn); };
 
       /* ---------- generic reveals ---------- */
       const reveals = $$("[data-reveal]");
@@ -259,10 +266,6 @@ export function Motion() {
       $$(".contact [data-lines] .line > span").forEach((el) => gsap.from(el, {
         yPercent: 110, duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 85%" },
       }));
-
-      /* hero parallax */
-      gsap.to(".hero__portrait", { yPercent: 10, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-      gsap.to(".hero__name", { y: -80, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
       /* school: 8.59 counts up, hairlines draw */
       const gpa = $(".gpa span"); const g = { v: 0 };
@@ -283,22 +286,15 @@ export function Motion() {
 
       /* ---------- desktop-only pinned scenes ---------- */
       mm.add("(min-width: 901px)", () => {
-        /* Five words: vertical scroll moves the track sideways, and it ends */
-        const track = $(".words__track");
-        const pad = () => parseFloat(getComputedStyle($(".words__viewport")).paddingLeft);
-        const dist = () => Math.max(0, track.scrollWidth - (root.clientWidth - pad() * 2));
-        const count = $(".words__count span");
-        const bar = $(".progress i");
-        gsap.to(track, {
-          x: () => -dist(), ease: "none",
-          scrollTrigger: {
-            trigger: ".words", start: "top top", end: () => "+=" + dist(), pin: true, scrub: 1, invalidateOnRefresh: true,
-            onUpdate: (st) => {
-              count.textContent = String(Math.min(5, 1 + Math.floor(st.progress * 5))).padStart(2, "0");
-              gsap.set(bar, { scaleX: 0.2 + st.progress * 0.8 });
-            },
-          },
-        });
+        /* Hero: pinned; the first scroll makes the portrait smile, then the five words appear around the face */
+        heroPinned = true;
+        const dur = () => (face.duration || 1) - 0.01;
+        gsap.timeline({ scrollTrigger: { trigger: hero, start: "top top", end: "+=160%", pin: true, scrub: 1, invalidateOnRefresh: true } })
+          .fromTo(face, { currentTime: 0 }, { currentTime: dur, duration: 0.35, ease: "none" }, 0)
+          .to([".hero__name", ".hero__words", ".hero__bl", ".hero__scroll", ".hero__vert"], { opacity: 0, y: -24, duration: 0.2, stagger: 0.02 }, 0.12)
+          .fromTo(".who__head", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.2 }, 0.3)
+          .fromTo(".who__item", { opacity: 0, x: (i: number, el: Element) => (el.classList.contains("who__item--l") ? -40 : 40) },
+            { opacity: 1, x: 0, duration: 0.2, stagger: 0.09 }, 0.36);
 
         /* Built: the folders sit in a drawer, newest in front; scrolling pulls each one out and the next comes forward */
         const cabinet = $(".cabinet");
@@ -336,7 +332,13 @@ export function Motion() {
           .fromTo(photo, { x: toCenter }, { x: 0, duration: 1, ease: "power2.inOut" })
           .fromTo(".sport__text > *", { opacity: 0, y: 40 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.5, ease: "power2.out" }, 0.45);
 
-        return () => { cabinet.classList.remove("cabinet--deck"); jump = null; };
+        /* Sports net: pinned while the ring spins (created after the pins above it, so its start accounts for their spacing) */
+        ScrollTrigger.create({ trigger: ".net__stage", start: "top top", end: "+=140%", pin: true, scrub: true, onUpdate: spinWith });
+
+        return () => { cabinet.classList.remove("cabinet--deck"); jump = null; heroPinned = false; };
+      });
+      mm.add("(max-width: 900px)", () => {
+        ScrollTrigger.create({ trigger: ".net", start: "top bottom", end: "bottom top", onUpdate: spinWith });
       });
 
       addEventListener("load", () => ScrollTrigger.refresh(), on);
