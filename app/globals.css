@@ -6,7 +6,6 @@
   --fg: #ededed;
   --mute: #a1a1a1;
   --red: #d71921;
-  --folder: #121212;
   --pad: clamp(20px, 3.9vw, 56px);
   --ease: cubic-bezier(.2, .7, .1, 1);
   --sans: var(--font-geist), "Geist", system-ui, -apple-system, sans-serif;
@@ -205,76 +204,48 @@ html:not(.js) .loader { display: none; }
 .who-list__rows .who__text { max-width: 34em; }
 
 /* ---------- 04 built ---------- */
-/* folders: a stack on phones (each one sticks a little lower), a drawer you flip through on desktop (.cabinet--deck, set in Motion).
-   The whole screenshot shows; the front flap only covers the info under it. */
-.cabinet { --tab-h: 44px; --tab-w: max(24%, 150px); --strip: 104px; display: grid; gap: 32px; }
-.folder { position: sticky; top: calc(84px + var(--i) * 14px); padding-top: var(--tab-h); }
-.folder__tab {
-  position: absolute; top: 0; z-index: 1; left: calc(var(--i) * (100% - var(--tab-w)) / 3); /* 3 = folders - 1 */
-  width: var(--tab-w); height: calc(var(--tab-h) + 1px);
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 18px;
-  background: var(--folder); border: 1px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0;
-  font: 400 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute);
-  white-space: nowrap; transition: color .3s, translate .5s var(--ease);
+/* phones (and reduced motion): a list of big screenshots with their info. Desktop: .gallery--3d (set in Motion) */
+.gallery { display: grid; gap: 56px; }
+.plate { display: grid; gap: 20px; }
+.plate__img {
+  aspect-ratio: 1.6; overflow: hidden; border-radius: 6px; border: 1px solid #2e2e2e; background: var(--surface);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .7);
 }
-.folder__back {
-  position: relative; display: grid; grid-template-areas: "doc" "info"; gap: 16px; padding: 18px; perspective: 1800px;
-  background: var(--folder); border: 1px solid var(--line); border-radius: 12px;
-}
-.folder__doc {
-  grid-area: doc; aspect-ratio: 1.6; overflow: hidden; border-radius: 6px; border: 1px solid #333; background: var(--surface);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, .5); transition: translate .7s var(--ease), scale .7s var(--ease);
-}
-.folder__doc img { object-position: top center; }
-.folder__info {
-  grid-area: info; min-height: var(--strip); display: grid; align-content: center; gap: 10px; padding: 0 8px;
-  opacity: 0; translate: 0 8px; transition: opacity .5s var(--ease), translate .7s var(--ease);
-}
-.folder__info .desc { color: var(--mute); font-size: 16px; line-height: 1.45; }
-.folder__meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; }
-.folder__link { color: var(--fg); border-bottom: 1px solid var(--mute); transition: border-color .3s; }
-.folder__link:hover { border-color: var(--fg); }
-/* the front flap: same cell as the info, out to the folder's edges */
-.folder__front {
-  grid-area: info; margin: 0 -18px -18px; min-height: calc(var(--strip) + 18px); z-index: 1;
-  display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 26px 22px;
-  font: inherit; color: var(--fg); text-align: left; cursor: pointer;
-  background: linear-gradient(180deg, #1e1e1e, #151515 70%); border: 1px solid #2e2e2e; border-radius: 12px;
-  box-shadow: 0 -16px 40px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .06);
-  transform-origin: 50% 100%; transition: transform 1s var(--ease), opacity .6s;
-}
-.folder__left { display: grid; gap: 6px; }
-.folder__front .role { color: var(--red); }
-.folder__name { font-size: clamp(30px, 3vw, 44px); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
-.folder__cta { display: inline-flex; align-items: center; gap: 10px; flex: none; font-size: 14px; font-weight: 500; padding: 9px 16px; border: 1px solid var(--line); border-radius: 999px; transition: border-color .3s, background .3s, color .3s; }
-.folder__cta i { font: 300 20px/1 var(--sans); font-style: normal; transition: rotate .4s var(--ease); }
-/* hover: the document lifts, the tab rises, the button lights up */
-.folder:hover .folder__doc { translate: 0 -6px; scale: 1.01; }
-.folder:hover .folder__tab { color: var(--fg); translate: 0 -3px; }
-.folder__front:hover .folder__cta { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-.folder__front:hover .folder__cta i { rotate: 90deg; }
-/* open: the flap swings down and the info under the screenshot shows */
-.folder.is-open .folder__front { transform: rotateX(-82deg); opacity: .3; }
-.folder.is-open .folder__info { opacity: 1; translate: 0 0; transition-delay: .25s; }
-@media (max-width: 600px) {
-  .cabinet { --tab-w: 132px; }
-  .folder__tab { padding: 0 12px; font-size: 11px; }
-  .folder__back { padding: 12px; gap: 12px; }
-  .folder__front { margin: 0 -12px -12px; padding: 16px 18px 18px; }
-  .folder__info .desc { font-size: 15px; }
-}
+.plate__img img { object-position: top center; }
+.plate__info { display: grid; gap: 14px; }
+.plate__name { font-size: clamp(32px, 3.2vw, 48px); font-weight: 600; letter-spacing: -.04em; line-height: 1; margin: 6px 0 8px; }
+.plate .role { color: var(--red); }
+.plate .desc { color: var(--mute); font-size: 16px; line-height: 1.45; max-width: 36em; }
+.plate__meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; margin-top: 12px; }
+.plate__link { color: var(--fg); border-bottom: 1px solid var(--mute); transition: border-color .3s; }
+.plate__link:hover { border-color: var(--fg); }
 @media (min-width: 901px) {
-  /* title on the left, the drawer on the right; the drawer is as big as the screen height allows */
   .built { padding-top: 0; }
-  .built__stage { padding-top: 104px; display: grid; grid-template-columns: minmax(260px, 1fr) auto; column-gap: 56px; align-items: start; }
-  .built__stage .h2 { font-size: clamp(40px, 3.6vw, 56px); }
-  .cabinet { width: min(calc(100vw - 2 * var(--pad) - 316px), calc((100svh - 104px - 44px - 48px - 36px - 16px - var(--strip) - 18px - 32px) * 1.6 + 36px)); }
+  .built__stage { padding-top: 104px; }
+  .plate__info { grid-template-columns: minmax(200px, 1fr) 1.6fr; gap: 40px; align-items: start; }
 }
-/* desktop deck: all folders in the same spot (the first one gives the height), GSAP moves them (see Motion) */
-.cabinet--deck { display: block; position: relative; padding-top: 48px; }
-.cabinet--deck .folder { position: absolute; left: 0; right: 0; bottom: 0; top: auto; }
-.cabinet--deck .folder:first-child { position: relative; }
-.built__stage { position: relative; }
+/* desktop gallery: title and the middle plate's info on the left, the plates in 3D on the right.
+   Every plate sits in the middle of the gallery; GSAP slides, turns and pushes them back (see Motion) */
+.built__infos { display: none; }
+.built__stage:has(.gallery--3d) {
+  height: 100svh; min-height: 720px; padding: 104px 0 112px; /* bottom: clears the music button */
+  display: grid; grid-template-columns: minmax(300px, 26vw) 1fr; column-gap: 40px;
+}
+.built__stage:has(.gallery--3d) .built__side { display: grid; grid-template-rows: auto 1fr; position: relative; z-index: 2; }
+.built__stage:has(.gallery--3d) .h2 { font-size: clamp(34px, 2.9vw, 44px); }
+.built__stage:has(.gallery--3d) .built__infos { display: grid; align-self: end; }
+.built__infos > .plate__info { grid-area: 1 / 1; grid-template-columns: 1fr; gap: 18px; }
+.gallery--3d .plate__info { display: none; }
+.gallery--3d {
+  --pw: min(86%, calc((100svh - 216px) * 1.6)); position: relative; display: block; perspective: 1700px;
+  /* plates leaving the gallery fade out at its edges instead of covering the text */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.gallery--3d .plate { position: absolute; top: 50%; left: 50%; width: var(--pw); }
+.gallery--3d .plate__img { transition: border-color .3s; }
+.gallery--3d .plate:not(.is-center) { cursor: pointer; }
+.gallery--3d .plate:not(.is-center):hover .plate__img { border-color: #777; }
+
 .also { color: var(--mute); margin-top: 72px; }
 
 /* ---------- 05 sport ---------- */
@@ -300,43 +271,45 @@ html:not(.js) .loader { display: none; }
 .post__caption { font-size: 14px; line-height: 1.4; color: var(--fg); max-width: min(100%, 460px); }
 .post__caption b { font-weight: 600; margin-right: 4px; }
 
-/* ---------- 05b sports net: cards on a ring around rugby that spins with the scroll (positions set in Motion) ---------- */
-.net__stage { padding: clamp(72px, 8vw, 120px) var(--pad) 40px; }
+/* ---------- 05b all the sports: a horizontal gallery of connected cards; you drag it (phones) or scroll it (desktop, see Motion).
+   Each card's place and size are fractions of the gallery height (--h), set per card in Sections. ---------- */
+.net__stage { padding: clamp(72px, 8vw, 120px) 0 40px; }
+.net__stage > .sec-head, .net__hint { padding: 0 var(--pad); }
 .net__stage .sec-head { margin-bottom: 0; position: relative; z-index: 2; }
-.net__board { position: relative; height: clamp(520px, 74svh, 760px); }
+.net__view { --h: min(76vw, 440px); height: calc(var(--h) + 24px); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
+.net__view::-webkit-scrollbar { display: none; }
+.net__track { position: relative; display: flex; align-items: flex-start; width: max-content; height: var(--h); padding: 0 var(--pad); }
 .net__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.net__lines line { stroke: #2e2e2e; stroke-width: 1; }
-.net__lines line.spoke { stroke: #555; }
+.net__lines line { stroke: #3a3a3a; stroke-width: 1; }
+.net__lines line.far { stroke: #1f1f1f; }
 .net__card {
-  --w: clamp(128px, 10.5vw, 180px);
-  position: absolute; left: 0; top: 0; width: var(--w); /* centered on its point by GSAP (xPercent/yPercent) */
-  display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .65); transition: border-color .3s;
+  position: relative; flex: none; display: grid; width: calc(var(--h) * var(--w));
+  margin-top: calc(var(--h) * var(--y)); margin-left: calc(var(--h) * var(--gap));
+  background: radial-gradient(120% 90% at 30% 0%, #1b1b1b, #0c0c0c 70%); border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .65); transition: border-color .3s, translate .6s var(--ease);
 }
-.net__card:hover { border-color: #555; }
-.net__card img { height: auto; }
-.net__card figcaption { display: grid; gap: 6px; padding: 12px 14px 14px; }
-.net__sport { font-size: clamp(17px, 1.4vw, 22px); font-weight: 600; letter-spacing: -.02em; line-height: 1.05; }
+.net__card:hover { border-color: #555; translate: 0 -6px; }
+.net__card > * { grid-area: 1 / 1; }
+.net__card img { height: auto; filter: grayscale(1) contrast(1.1); transition: filter .6s; }
+.net__card:hover img { filter: none; }
+.net__card:not(:has(img)) { aspect-ratio: var(--ar); }
+.net__card figcaption { position: relative; align-self: end; display: grid; gap: 6px; padding: 40px 16px 14px; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); }
+.net__card:not(:has(img)) figcaption { background: none; }
+.net__sport { font-size: clamp(20px, 2vw, 30px); font-weight: 600; letter-spacing: -.02em; line-height: 1.05; }
 .net__card .label { font-size: 10px; }
-/* type-only card until there is a photo: tall enough to read as a photo slot */
-.net__card:not(:has(img)) { aspect-ratio: 4 / 3; align-content: end; background: radial-gradient(120% 90% at 30% 0%, #1b1b1b, #0c0c0c 70%); }
-.net__card:not(:has(img)) .net__sport { font-size: clamp(22px, 2vw, 30px); }
-.net__card--photo img { aspect-ratio: 4 / 3; object-position: 50% 30%; }
-.net__card--core { --w: clamp(170px, 15vw, 230px); z-index: 20; border-color: #555; }
-.net__card--core img { aspect-ratio: 4 / 5; object-position: 50% 15%; }
-.net__card--core .net__sport { font-size: clamp(26px, 2.6vw, 38px); }
+.net__card--core { border-color: #444; }
+.net__card--core .net__sport { font-size: clamp(28px, 3vw, 44px); }
 .net__card--core .label { color: var(--red); }
+.net__hint { margin-top: 16px; }
 @media (min-width: 901px) {
   .net { padding: 0; }
-  .net__stage { padding-top: 104px; height: 100svh; min-height: 720px; display: grid; grid-template-rows: auto 1fr; }
-  .net__board { height: auto; }
+  .net__stage { padding-top: 104px; height: 100svh; min-height: 720px; display: grid; grid-template-rows: auto 1fr auto; align-items: center; }
+  .net__stage .h2 { font-size: clamp(34px, 2.9vw, 44px); }
+  .net__view { --h: min(calc(100svh - 104px - 130px - 100px), 640px); }
+  .net__hint { text-align: right; }
 }
-@media (max-width: 600px) {
-  .net__card { --w: 104px; }
-  .net__card--core { --w: 150px; }
-  .net__card figcaption { padding: 8px 10px 10px; }
-  .net__card:not(:has(img)) .net__sport { font-size: 16px; }
-}
+/* desktop: GSAP moves the track, so the view stops being a scroller */
+.net--pinned .net__view { overflow: hidden; }
 
 /* ---------- 06 school ---------- */
 .school { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }

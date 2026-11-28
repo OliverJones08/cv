@@ -1,6 +1,6 @@
 import Image, { type StaticImageData } from "next/image";
 import type { CSSProperties, ReactNode } from "react";
-import { T } from "./T";
+import { T, Ptr } from "./T";
 import restoman from "@/assets/restoman.jpg";
 import boutique from "@/assets/boutique-landing.jpg";
 import patanazo from "@/assets/patanazo.jpg";
@@ -21,7 +21,8 @@ import rugbyLineout from "@/assets/sports/rugby-lineout.jpg";
 
 const half = "(max-width: 900px) 100vw, 50vw";
 
-/* 03 · Built: folders stored in a drawer. Scrolling flips through them; tapping one opens it.
+/* 03 · Built: a gallery of big screenshots in 3D (KHZ Art). On desktop, scrolling slides them sideways;
+   the one in the middle turns flat, stops for a moment and shows its info. On phones it is a plain list.
    Order: the robot first, then Restoman, then the rest. "since" is when each project's repo was created. */
 type Project = { name: string; img: StaticImageData; alt: string; href?: string; since: [string, string]; role: [string, string]; desc: [string, string]; stack: string };
 const projects: Project[] = [
@@ -55,51 +56,51 @@ const projects: Project[] = [
   },
 ];
 
+const Info = ({ p, i }: { p: Project; i: number }) => (
+  <>
+    <div>
+      <p className="label">{String(i + 1).padStart(2, "0")} · <T en={p.since[0]} es={p.since[1]} /></p>
+      <h3 className="plate__name">{p.name}</h3>
+      <p className="label role"><T en={p.role[0]} es={p.role[1]} /></p>
+    </div>
+    <div>
+      <p className="desc"><T en={p.desc[0]} es={p.desc[1]} /></p>
+      <p className="plate__meta">
+        <span className="label fg">{p.stack}</span>
+        {p.href && (
+          <a className="plate__link" href={p.href} target="_blank" rel="noopener">
+            <T en="Visit the site ↗" es="Ver el sitio ↗" />
+          </a>
+        )}
+      </p>
+    </div>
+  </>
+);
+
 export function Built() {
   return (
     <section className="built section" id="built">
       <div className="built__stage">
-        <header className="sec-head">
-          <p className="label" data-reveal><T en="02 / Built" es="02 / Proyectos" /></p>
-          <h2 className="h2" data-reveal>
-            <T en={<>Things I&apos;ve built,<br /><span className="soft">for real people.</span></>} es={<>Cosas que construí,<br /><span className="soft">para gente real.</span></>} />
-          </h2>
-        </header>
-        <div className="cabinet">
-          {projects.map((p, i) => {
-            const num = String(i + 1).padStart(2, "0");
-            return (
-              <article className="folder" key={p.name} style={{ "--i": i } as CSSProperties}>
-                <button className="folder__tab" type="button" tabIndex={-1} aria-hidden="true">
-                  <span>{num}</span>
-                  <span><T en={p.since[0]} es={p.since[1]} /></span>
-                </button>
-                <div className="folder__back">
-                  {/* the whole screenshot shows; only the info under it is covered by the flap */}
-                  <figure className="folder__doc"><Image src={p.img} alt={p.alt} sizes="(max-width: 900px) 100vw, 60vw" /></figure>
-                  <div className="folder__info">
-                    <p className="desc"><T en={p.desc[0]} es={p.desc[1]} /></p>
-                    <p className="folder__meta">
-                      <span className="label fg">{p.stack}</span>
-                      {p.href && (
-                        <a className="folder__link" href={p.href} target="_blank" rel="noopener">
-                          <T en="Visit the site ↗" es="Ver el sitio ↗" />
-                        </a>
-                      )}
-                    </p>
-                  </div>
-                  <button className="folder__front" type="button" aria-expanded="false">
-                    <span className="folder__left">
-                      <span className="label role"><T en={p.role[0]} es={p.role[1]} /></span>
-                      <span className="folder__name">{p.name}</span>
-                    </span>
-                    <span className="folder__cta"><T en="Open" es="Abrir" /><i aria-hidden="true">+</i></span>
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+        <div className="built__side">
+          <header className="sec-head">
+            <p className="label" data-reveal><T en="02 / Built" es="02 / Proyectos" /></p>
+            <h2 className="h2" data-reveal>
+              <T en={<>Things I&apos;ve built,<br /><span className="soft">for real people.</span></>} es={<>Cosas que construí,<br /><span className="soft">para gente real.</span></>} />
+            </h2>
+          </header>
+          {/* desktop: the info of the plate in the middle (phones show it under each plate instead) */}
+          <div className="built__infos">
+            {projects.map((p, i) => <div className="plate__info" key={p.name}><Info p={p} i={i} /></div>)}
+          </div>
         </div>
+        <ol className="gallery">
+          {projects.map((p, i) => (
+            <li className="plate" key={p.name}>
+              <figure className="plate__img"><Image src={p.img} alt={p.alt} sizes="(max-width: 900px) 100vw, 64vw" /></figure>
+              <div className="plate__info"><Info p={p} i={i} /></div>
+            </li>
+          ))}
+        </ol>
       </div>
       <p className="also" data-reveal>
         <T
@@ -145,17 +146,19 @@ export function Sport() {
   );
 }
 
-/* 04b · The other sports: a big net of cards around rugby that spins as you scroll (Method's connected photos).
-   Only rugby has real photos for now (England Rugby's); the other cards are type until there are photos. */
-type Sport = { en: string; es: string; note?: [string, string]; img?: StaticImageData; alt?: string };
-const ring: Sport[] = [
-  { en: "Boxing", es: "Boxeo" },
-  { en: "Krav Maga", es: "Krav Maga" },
-  { en: "Rugby", es: "Rugby", note: ["Lineout · BACRC", "Line · BACRC"], img: rugbyLineout, alt: "BACRC players throwing into a lineout at training" },
-  { en: "Golf", es: "Golf" },
-  { en: "Tennis", es: "Tenis" },
-  { en: "Football", es: "Fútbol" },
-  { en: "Swimming", es: "Natación", note: ["school team", "equipo del colegio"] },
+/* 04b · All the sports: a horizontal gallery of connected cards (Method's photo gallery). On desktop scrolling down
+   moves it sideways and it ends at the last card; on phones you drag it. Only rugby has real photos (England Rugby's);
+   the other cards are type until there are photos. y, w and gap are fractions of the gallery's height. */
+type Card = { en: string; es: string; note?: [string, string]; img?: StaticImageData; alt?: string; ar?: string; y: number; w: number; gap: number };
+const cards: Card[] = [
+  { en: "Rugby", es: "Rugby", note: ["since 4 · BACRC · photo: England Rugby", "desde los 4 · BACRC · foto: England Rugby"], img: rugbyCelebration, alt: "Oliver celebrating at a BACRC training with England Rugby", y: 0.04, w: 0.56, gap: 0 },
+  { en: "Boxing", es: "Boxeo", ar: "4 / 3", y: 0.1, w: 0.52, gap: 0.24 },
+  { en: "Rugby", es: "Rugby", note: ["Lineout · BACRC", "Line · BACRC"], img: rugbyLineout, alt: "BACRC players throwing into a lineout at training", y: 0.36, w: 0.5, gap: 0.16 },
+  { en: "Krav Maga", es: "Krav Maga", ar: "3 / 4", y: 0.03, w: 0.36, gap: 0.2 },
+  { en: "Golf", es: "Golf", ar: "4 / 3", y: 0.52, w: 0.58, gap: 0.12 },
+  { en: "Tennis", es: "Tenis", ar: "3 / 4", y: 0.1, w: 0.38, gap: 0.24 },
+  { en: "Football", es: "Fútbol", ar: "4 / 3", y: 0.56, w: 0.52, gap: 0.1 },
+  { en: "Swimming", es: "Natación", note: ["school team", "equipo del colegio"], ar: "3 / 4", y: 0.18, w: 0.42, gap: 0.26 },
 ];
 
 export function Net() {
@@ -165,28 +168,30 @@ export function Net() {
         <header className="sec-head">
           <p className="label" data-reveal><T en="More sports" es="Más deportes" /></p>
           <h2 className="h2" data-reveal>
-            <T en={<>Rugby first.<br /><span className="soft">Six more around it.</span></>} es={<>Rugby primero.<br /><span className="soft">Seis más alrededor.</span></>} />
+            <T en={<>Rugby first.<br /><span className="soft">Six more next to it.</span></>} es={<>Rugby primero.<br /><span className="soft">Seis más al lado.</span></>} />
           </h2>
         </header>
-        <div className="net__board">
-          <svg className="net__lines" aria-hidden="true" />
-          <figure className="net__card net__card--core">
-            <Image src={rugbyCelebration} alt="Oliver celebrating at a BACRC training with England Rugby" sizes="300px" />
-            <figcaption>
-              <span className="net__sport">Rugby</span>
-              <span className="label"><T en="since 4 · BACRC · photo: England Rugby" es="desde los 4 · BACRC · foto: England Rugby" /></span>
-            </figcaption>
-          </figure>
-          {ring.map((s) => (
-            <figure className={s.img ? "net__card net__card--photo" : "net__card"} key={s.en + (s.img ? "-photo" : "")}>
-              {s.img && <Image src={s.img} alt={s.alt!} sizes="240px" />}
-              <figcaption>
-                <span className="net__sport"><T en={s.en} es={s.es} /></span>
-                {s.note && <span className="label"><T en={s.note[0]} es={s.note[1]} /></span>}
-              </figcaption>
-            </figure>
-          ))}
+        <div className="net__view">
+          <div className="net__track">
+            <svg className="net__lines" aria-hidden="true" />
+            {cards.map((c, i) => (
+              <figure
+                className={i === 0 ? "net__card net__card--core" : "net__card"}
+                key={i}
+                style={{ "--y": c.y, "--w": c.w, "--gap": c.gap, "--ar": c.ar } as CSSProperties}
+              >
+                {c.img && <Image src={c.img} alt={c.alt!} sizes="(max-width: 900px) 60vw, 360px" />}
+                <figcaption>
+                  <span className="net__sport"><T en={c.en} es={c.es} /></span>
+                  {c.note && <span className="label"><T en={c.note[0]} es={c.note[1]} /></span>}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
+        <p className="label net__hint">
+          <T en={<><Ptr fine="Scroll" coarse="Drag sideways" /> · 08 cards</>} es={<><Ptr fine="Scrolleá" coarse="Deslizá de costado" /> · 08 tarjetas</>} />
+        </p>
       </div>
     </section>
   );

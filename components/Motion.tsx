@@ -206,55 +206,25 @@ export function Motion() {
       // Esc is native for <dialog>, but some browsers skip it without a fresh gesture, so handle it too
       addEventListener("keydown", (e) => { if (e.key === "Escape" && dlg.open) dlg.close(); }, on);
 
-      /* ---------- built: tap a folder to open it, tap again (or its document) to close ---------- */
-      const folders = $$(".folder");
-      const setOpen = (f: HTMLElement, open: boolean) => {
-        f.classList.toggle("is-open", open);
-        $(".folder__front", f).setAttribute("aria-expanded", String(open));
+      /* ---------- sports gallery: thin lines join each card to the next two (and run off both ends) ---------- */
+      const track = $(".net__track");
+      const netCards = $$(".net__card", track);
+      const draw = () => {
+        const mid = netCards.map((c) => [c.offsetLeft + c.offsetWidth / 2, c.offsetTop + c.offsetHeight / 2]);
+        const line = (a: number[], b: number[], far = false) =>
+          `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"${far ? ' class="far"' : ""}/>`;
+        svg.innerHTML = [
+          line([0, mid[0][1] * 0.6], mid[0]),
+          ...mid.slice(1).map((m, i) => line(mid[i], m)),
+          ...mid.slice(2).map((m, i) => line(mid[i], m, true)),
+          line(mid.at(-1)!, [track.scrollWidth, mid.at(-1)![1] * 1.3]),
+        ].join("");
       };
-      let jump: ((i: number) => void) | null = null; // desktop deck: a tab brings its folder to the front
-      folders.forEach((f, i) => {
-        $(".folder__front", f).addEventListener("click", () => setOpen(f, !f.classList.contains("is-open")), on);
-        $(".folder__back", f).addEventListener("click", (e) => {
-          if (!(e.target as Element).closest("a, .folder__front")) setOpen(f, false);
-        }, on);
-        $(".folder__tab", f).addEventListener("click", () => (jump ? jump(i) : setOpen(f, true)), on);
-      });
-
-      /* ---------- sports net: rugby in the middle, the sports on a ring around it; scrolling spins the ring ---------- */
-      const board = $(".net__board");
-      const core = $(".net__card--core", board);
-      const ring = $$(".net__card:not(.net__card--core)", board);
-      const n7 = ring.length;
-      const mk = (cls?: string) => { const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); if (cls) l.classList.add(cls); svg.append(l); return l; };
-      const spokes = ring.map(() => mk("spoke"));
-      const rim = ring.map(() => mk());
-      const cross = ring.map(() => mk());
-      const setLine = (l: SVGLineElement, a: number[], b: number[]) => {
-        l.setAttribute("x1", String(a[0])); l.setAttribute("y1", String(a[1])); l.setAttribute("x2", String(b[0])); l.setAttribute("y2", String(b[1]));
-      };
-      // rot is the ring's turn in radians; cards lower on the ring are nearer: bigger, brighter, on top
-      const spin = (rot: number) => {
-        const W = board.clientWidth, H = board.clientHeight, c = [W / 2, H / 2];
-        const rx = Math.min(W * 0.46, 640), ry = H * 0.4;
-        gsap.set(core, { x: c[0], y: c[1], xPercent: -50, yPercent: -50 });
-        const pts = ring.map((card, i) => {
-          const a = -Math.PI / 2 + (i * 2 * Math.PI) / n7 + rot;
-          const depth = (Math.sin(a) + 1) / 2;
-          const p = [c[0] + rx * Math.cos(a), c[1] + ry * Math.sin(a)];
-          gsap.set(card, { x: p[0], y: p[1], xPercent: -50, yPercent: -50, scale: 0.78 + 0.32 * depth, opacity: 0.55 + 0.45 * depth, zIndex: 1 + Math.round(depth * 18) });
-          return p;
-        });
-        pts.forEach((p, i) => { setLine(spokes[i], c, p); setLine(rim[i], p, pts[(i + 1) % n7]); setLine(cross[i], p, pts[(i + 2) % n7]); });
-      };
-      let turn = 0;
-      spin(turn);
-      addEventListener("resize", () => spin(turn), on);
+      draw();
+      addEventListener("resize", draw, on);
+      addEventListener("load", draw, on);
 
       if (reduce) return; // everything below is motion
-
-      /* sports net: the ring turns as the section scrolls by (pinned on desktop, below) */
-      const spinWith = (st: ScrollTrigger) => { turn = st.progress * Math.PI * 1.15; spin(turn); };
 
       /* ---------- generic reveals ---------- */
       const reveals = $$("[data-reveal]");
@@ -296,33 +266,41 @@ export function Motion() {
           .fromTo(".who__item", { opacity: 0, x: (i: number, el: Element) => (el.classList.contains("who__item--l") ? -40 : 40) },
             { opacity: 1, x: 0, duration: 0.2, stagger: 0.09 }, 0.36);
 
-        /* Built: the folders sit in a drawer, newest in front; scrolling pulls each one out and the next comes forward */
-        const cabinet = $(".cabinet");
-        cabinet.classList.add("cabinet--deck");
-        const n = folders.length;
-        const slot = (s: number) => ({ y: -s * 16, scale: 1 - s * 0.035 }); // further back = higher and smaller, so its tab shows
-        folders.forEach((f, i) => gsap.set(f, { ...slot(i), zIndex: n - i, transformOrigin: "50% 0%" }));
-        let front = 0;
-        const deck = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".built__stage", start: "top top", end: () => "+=" + innerHeight * 0.9 * (n - 1), pin: true, scrub: 1, invalidateOnRefresh: true,
-            onUpdate: (st) => {
-              const k = Math.round(st.progress * (n - 1));
-              if (k !== front) { front = k; folders.forEach((f) => setOpen(f, false)); } // a folder closes when it leaves the front
-            },
-          },
-        });
-        for (let k = 0; k < n - 1; k++) {
-          // slides down out of the drawer, solid until it is almost gone
-          deck.to(folders[k], { yPercent: 105, rotateX: -18, duration: 1, ease: "power2.in" }, k)
-            .to(folders[k], { opacity: 0, duration: 0.35, ease: "power1.in" }, k + 0.65);
-          for (let j = k + 1; j < n; j++) deck.to(folders[j], { ...slot(j - k - 1), duration: 1, ease: "power2.inOut" }, k);
-        }
-        jump = (i) => {
-          const st = deck.scrollTrigger!;
-          const y = st.start + ((st.end - st.start) * i) / (n - 1);
-          if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else scrollTo({ top: y, behavior: "smooth" });
+        /* Built: the screenshots slide past in 3D; the one in the middle turns flat and stays a moment so it can be read */
+        const gallery = $(".gallery");
+        const plates = $$(".plate", gallery);
+        const n = plates.length;
+        gallery.classList.add("gallery--3d");
+        const state = { p: 0 };
+        const clamp = gsap.utils.clamp(-1, 1);
+        // each step holds still for the first and last quarter, so a plate rests flat in the middle
+        const hold = (p: number) => { const k = Math.floor(p), t = p - k; return k + gsap.parseEase("power2.inOut")(gsap.utils.clamp(0, 1, (t - 0.25) / 0.5)); };
+        const infos = $$(".built__infos > .plate__info");
+        const place = () => {
+          const G = gallery.clientWidth, at = hold(state.p);
+          plates.forEach((pl, i) => {
+            const d = i - at, a = Math.abs(d), near = Math.min(a, 1);
+            gsap.set(pl, {
+              xPercent: -50, yPercent: -50, x: Math.sign(d) * (near * G * 0.8 + Math.max(a - 1, 0) * G * 0.3),
+              z: -Math.min(a, 2) * 700, rotateY: -clamp(d) * 36,
+              filter: `brightness(${1 - Math.min(a, 1.5) * 0.45})`, zIndex: 10 - Math.round(a * 2),
+            });
+            pl.classList.toggle("is-center", a < 0.3);
+            gsap.set(infos[i], { opacity: Math.max(0, 1 - a * 2.5), y: d * 30 });
+            infos[i].inert = a >= 0.3;
+          });
         };
+        const slide = gsap.to(state, {
+          p: n - 1, ease: "none", onUpdate: place,
+          scrollTrigger: { trigger: ".built__stage", start: "top top", end: () => "+=" + innerHeight * 0.9 * (n - 1), pin: true, scrub: 1, invalidateOnRefresh: true },
+        });
+        place();
+        // a click on a plate at the side brings it to the middle
+        plates.forEach((pl, i) => pl.addEventListener("click", (e) => {
+          if (pl.classList.contains("is-center") || (e.target as Element).closest("a")) return;
+          const st = slide.scrollTrigger!, y = st.start + ((st.end - st.start) * i) / (n - 1);
+          if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else scrollTo({ top: y, behavior: "smooth" });
+        }, on));
 
         /* Sport: photo starts centered and big, slides to the right */
         const photo = $(".sport__photo");
@@ -332,13 +310,23 @@ export function Motion() {
           .fromTo(photo, { x: toCenter }, { x: 0, duration: 1, ease: "power2.inOut" })
           .fromTo(".sport__text > *", { opacity: 0, y: 40 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.5, ease: "power2.out" }, 0.45);
 
-        /* Sports net: pinned while the ring spins (created after the pins above it, so its start accounts for their spacing) */
-        ScrollTrigger.create({ trigger: ".net__stage", start: "top top", end: "+=140%", pin: true, scrub: true, onUpdate: spinWith });
+        /* Sports: pinned while the track slides left, and it stops at the last card
+           (created after the pins above it, so its start accounts for their spacing) */
+        const net = $(".net");
+        net.classList.add("net--pinned");
+        const view = $(".net__view");
+        const dist = () => track.scrollWidth - view.clientWidth;
+        gsap.fromTo(track, { x: 0 }, {
+          x: () => -dist(), ease: "none",
+          scrollTrigger: { trigger: ".net__stage", start: "top top", end: () => "+=" + dist(), pin: true, scrub: 1, invalidateOnRefresh: true },
+        });
 
-        return () => { cabinet.classList.remove("cabinet--deck"); jump = null; heroPinned = false; };
-      });
-      mm.add("(max-width: 900px)", () => {
-        ScrollTrigger.create({ trigger: ".net", start: "top bottom", end: "bottom top", onUpdate: spinWith });
+        return () => {
+          // place() runs from onUpdate, so matchMedia did not record those sets; clear them by hand
+          gsap.set([...plates, ...infos], { clearProps: "all" });
+          infos.forEach((el) => (el.inert = false));
+          plates.forEach((pl) => pl.classList.remove("is-center"));
+          gallery.classList.remove("gallery--3d"); net.classList.remove("net--pinned"); heroPinned = false; };
       });
 
       addEventListener("load", () => ScrollTrigger.refresh(), on);
